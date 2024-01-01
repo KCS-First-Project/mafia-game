@@ -2,6 +2,7 @@ package com.mafiachat.server.handler;
 
 import com.mafiachat.protocol.*;
 import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.server.Phase;
 import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 import com.mafiachat.server.Role;
@@ -20,6 +21,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
     private final int id;
     private String chatName;
     private boolean ready = false;
+    private boolean alive = true;
     private Role role;
 
     public PlayerHandler(Socket s) throws IOException {
@@ -56,34 +58,34 @@ public class PlayerHandler implements Runnable, ClientHandler {
 
     @Override
     public int getId() {
-        return 0;
+        return id;
     }
 
     @Override
     public String getClientName() {
-        return chatName;
+        return this.chatName;
     }
 
     @Override
     public String getFrom() {
-        return host;
+        return this.host;
     }
 
     @Override
     public void sendMessage(String message) {
-        pw.println(message);
+        this.pw.println(message);
     }
 
     @Override
     public ChatRequest getRequest() throws IOException {
-        String formattedMessage = br.readLine();
+        String formattedMessage = this.br.readLine();
         return new ChatRequest(formattedMessage);
     }
 
     @Override
     public void close() {
         try {
-            socket.close();
+            this.socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,29 +104,63 @@ public class PlayerHandler implements Runnable, ClientHandler {
                 setReady();
                 GameManager.tryStartGame();
                 break;
+            case VOTE:
+                vote(request);
+                break;
+            case ACT_ROLE:
+                targetPlayer(request);
+                break;
             default:
                 System.out.printf("ChatCommand %s \n", command.name());
         }
     }
 
-    public boolean isReady(){
-        return ready;
+
+    public Role getRole() {
+        return this.role;
     }
 
-    public void setRole(Role role){
+    public boolean isReady() {
+        return this.ready;
+    }
+
+    public boolean isAlive() {
+        return this.alive;
+    }
+
+    public void setRole(Role role) {
         this.role = role;
     }
 
     public void setReady() {
-        ready = true;
+        this.ready = true;
+    }
+
+    public void killInGame() {
+        this.alive = false;
     }
 
     private void sendNormalMessage(ChatRequest request) {
-        GroupManager.broadcastMessage(request);
+        if ((GameManager.getPhase() == Phase.NIGHT) && (this.role != Role.CITIZEN)) {
+            GameManager.broadcastNormalRoleMessage(role, request);
+        } else {
+            GroupManager.broadcastMessage(request);
+        }
     }
 
     private void initAlias(ChatRequest request) {
-        chatName = request.getBody();
+        this.chatName = request.getBody();
         GroupManager.broadcastNewChatter(this);
+    }
+
+    private void vote(ChatRequest request) {
+        int id = Integer.parseInt(request.getBody());
+        GameManager.vote(id);
+    }
+
+    private void targetPlayer(ChatRequest request) {
+        int id = Integer.parseInt(request.getBody());
+        PlayerHandler target = (PlayerHandler) GroupManager.findClientById(id);
+        GameManager.setTargetPlayer(this, target);
     }
 }

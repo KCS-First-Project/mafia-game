@@ -6,16 +6,20 @@ public class ChatRequest extends ChatData {
         super(formattedMessage);
     }
 
-    public static ChatRequest createRequest(Command command, String body){
+    public static ChatRequest createRequest(Command command, String body) {
         String formattedMessage = createFormattedMessage(command, body);
         return new ChatRequest(formattedMessage);
     }
 
-    public static ChatRequest createAliasInitRequest(String name){
+    public static ChatRequest createAliasInitRequest(String name) {
         return createRequest(Command.INIT_ALIAS, name);
     }
 
-    public static ChatRequest createNormalRequest(String chatName, String body){
+    public static ChatRequest createNormalRequest(String chatName, String body) {
         return createRequest(Command.NORMAL, "%s: %s".formatted(chatName, body));
+    }
+
+    public static ChatRequest createSystemRequest(String body) {
+        return createRequest(Command.SYSTEM, "[SYSTEM] " + body);
     }
 }
