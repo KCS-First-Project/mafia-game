@@ -1,8 +1,14 @@
 package com.mafiachat.server;
 
 public enum Role {
-    CITIZEN,
-    MAFIA,
-    DOCTOR,
-    POLICE;
+    CITIZEN("시민"),
+    MAFIA("마피아"),
+    DOCTOR("의사"),
+    POLICE("경찰");
+
+    public final String description;
+
+    Role(String description) {
+        this.description = description;
+    }
 }

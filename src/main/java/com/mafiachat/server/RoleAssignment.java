@@ -25,14 +25,14 @@ public enum RoleAssignment {
         this.policeNumber = policeNumber;
     }
 
-    public static RoleAssignment getAssignment(int playerNumber){
+    public static RoleAssignment getAssignment(int playerNumber) {
         return playerNumber2RoleAssignment.get(playerNumber);
     }
 
-    private static HashMap<Integer, RoleAssignment> initPlayerNumber2RoleAssignment(){
+    private static HashMap<Integer, RoleAssignment> initPlayerNumber2RoleAssignment() {
         HashMap<Integer, RoleAssignment> playerNumber2RoleAssignment = new HashMap<>();
         int playerNumber = MIN_PLAYER_NUMBER;
-        for (RoleAssignment roleAssignment: RoleAssignment.values()) {
+        for (RoleAssignment roleAssignment : RoleAssignment.values()) {
             playerNumber2RoleAssignment.put(playerNumber, roleAssignment);
             playerNumber++;
         }
