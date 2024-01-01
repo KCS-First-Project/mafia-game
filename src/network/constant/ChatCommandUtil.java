@@ -1,5 +1,8 @@
 package network.constant;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public enum ChatCommandUtil {
     NOMATCH("noMatch"),
     WHISPER("whisper"),
@@ -23,7 +26,7 @@ public enum ChatCommandUtil {
     private static final char OPEN_BRACKET = '[';
     private static final char CLOSE_BRACKET = ']';
 
-//    public static String getCommand(String command) {
+//    public static String command(String command) {
 //        return Arrays.stream(ChatCommandUtil.values())
 //                .filter(commandUtil -> commandUtil.command.equals(command))
 //                .findAny()
@@ -31,13 +34,19 @@ public enum ChatCommandUtil {
 //                .getCommand();
 //    }
 
-    public static String getCommand(String msg) {
-        String[] parts = msg.split("\\[|\\]");
-        if (parts.length > 1 && parts[0].isEmpty() && parts[1].length() == 1 && parts[1].matches("[a-z]")) {
-            return parts[1];
+
+    public static String parseCommand(String msg) {
+        Matcher matcher = Pattern.compile("\\[([a-zA-Z]+)\\]").matcher(msg);
+
+        if (matcher.find()) {
+            return matcher.group(1);
         } else {
-            return UNKNOWN.getCommand();
+            return ChatCommandUtil.UNKNOWN.getCommand();
         }
+    }
+
+    public static String parseMessage(String msg) {
+        return msg.replaceFirst("\\[([a-zA-Z]+)\\]", "");
     }
 
     public static String formattingMessage(String message) {
