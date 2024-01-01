@@ -4,28 +4,52 @@ import com.mafiachat.exception.MaxPlayerException;
 import com.mafiachat.protocol.*;
 import com.mafiachat.server.handler.ClientHandler;
 
+import java.util.Optional;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.mafiachat.util.Constant.MAX_PLAYER_NUMBER;
 
 public class GroupManager {
+	private static int nextClientId = 1;
 	private static final Vector<ClientHandler> clientGroup = new Vector<>();
+	private static final Logger logger = Logger.getLogger(GameManager.class.getSimpleName());
+	
 	private GroupManager() {}
+
+	synchronized public static int createClientId(){
+		int id = nextClientId;
+		nextClientId++;
+		return id;
+	}
+
+	public static ClientHandler findClientById(int id){
+		Optional<ClientHandler> client = clientGroup.stream()
+				.filter((c) -> c.getId() == id)
+				.findFirst();
+		if (client.isEmpty()){
+			throw new IllegalArgumentException();
+		}
+		return client.get();
+	}
+
 	public static void addClientHandler(ClientHandler handler) {
 		if (clientGroup.size() == MAX_PLAYER_NUMBER) {
 			throw new MaxPlayerException("최대 %s인까지 참가 가능합니다.".formatted(MAX_PLAYER_NUMBER));
 		}
 		clientGroup.add(handler);
-		System.out.println("Active clients count: " + clientGroup.size());
+		logger.log(Level.INFO, "Active clients count: " + clientGroup.size());
 	}
 	public static void removeClientHandler(ClientHandler handler) {
 		clientGroup.remove(handler);
-		System.out.println("Active clients count: " + clientGroup.size());
+		logger.log(Level.INFO, "Active clients count: " + clientGroup.size());
 		ChatRequest request = ChatRequest.createRequest(Command.EXIT_ROOM, handler.getClientName() + " has just left chat room");
 		broadcastMessage(request);
 	}
 	public static void broadcastMessage(ChatRequest request, Vector<ClientHandler> receivers) {
+		logger.log(Level.INFO, "broadcast: " + request.getFormattedMessage());
 		ChatResponse response = ChatResponse.createResponse(request.getCommand(), request.getBody());
 		for(ClientHandler handler: receivers) {
 			handler.sendMessage(response.getFormattedMessage());

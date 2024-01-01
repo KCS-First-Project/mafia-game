@@ -17,16 +17,18 @@ public class PlayerHandler implements Runnable, ClientHandler {
     private final BufferedReader br;
     private final PrintWriter pw;
     private final String host;
+    private final int id;
     private String chatName;
     private boolean ready = false;
     private Role role;
 
     public PlayerHandler(Socket s) throws IOException {
-        socket = s;
-        host = socket.getInetAddress().getHostAddress();
-        br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        pw = new PrintWriter(socket.getOutputStream(), true);
-        chatName = "anonymous";
+        this.socket = s;
+        this.host = socket.getInetAddress().getHostAddress();
+        this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.pw = new PrintWriter(socket.getOutputStream(), true);
+        this.id = GroupManager.createClientId();
+        this.chatName = "anonymous";
         GroupManager.addClientHandler(this);
         GameManager.addPlayerHandler(this);
     }
@@ -52,29 +54,39 @@ public class PlayerHandler implements Runnable, ClientHandler {
         System.out.println("Terminating ClientHandler");
     }
 
+    @Override
+    public int getId() {
+        return 0;
+    }
+
+    @Override
+    public String getClientName() {
+        return chatName;
+    }
+
+    @Override
+    public String getFrom() {
+        return host;
+    }
+
+    @Override
     public void sendMessage(String message) {
         pw.println(message);
     }
 
+    @Override
     public ChatRequest getRequest() throws IOException {
         String formattedMessage = br.readLine();
         return new ChatRequest(formattedMessage);
     }
 
+    @Override
     public void close() {
         try {
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getFrom() {
-        return host;
-    }
-
-    public String getClientName() {
-        return chatName;
     }
 
     public void processRequest(ChatRequest request) {
@@ -88,6 +100,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
                 break;
             case READY:
                 setReady();
+                GameManager.tryStartGame();
                 break;
             default:
                 System.out.printf("ChatCommand %s \n", command.name());
@@ -102,6 +115,10 @@ public class PlayerHandler implements Runnable, ClientHandler {
         this.role = role;
     }
 
+    public void setReady() {
+        ready = true;
+    }
+
     private void sendNormalMessage(ChatRequest request) {
         GroupManager.broadcastMessage(request);
     }
@@ -109,10 +126,5 @@ public class PlayerHandler implements Runnable, ClientHandler {
     private void initAlias(ChatRequest request) {
         chatName = request.getBody();
         GroupManager.broadcastNewChatter(this);
-    }
-
-    private void setReady() {
-        ready = true;
-        GameManager.tryStartGame();
     }
 }
