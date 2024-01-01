@@ -7,6 +7,9 @@ import com.mafiachat.util.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 public class ChatServerTest {
     @Test
@@ -49,12 +52,21 @@ public class ChatServerTest {
         System.out.println(c2.read());
     }
 
-    private void runServer() throws IOException {
+    public static void runServer() throws IOException {
         Thread serverThread = new Thread(new ChatServer());
         serverThread.start();
     }
 
-    private TestClient connectClient(String alias) throws IOException {
+    public static List<TestClient> connectClients(int userNumber) throws IOException {
+        ArrayList<TestClient> clients = new ArrayList<>();
+        for (int i=0;i<userNumber;i++){
+            TestClient client = connectClient("user%s".formatted(i+1));
+            clients.add(client);
+        }
+        return clients;
+    }
+
+    public static TestClient connectClient(String alias) throws IOException {
         TestClient testClient = new TestClient(Constant.SERVER_HOST, Constant.SERVER_PORT);
         ChatRequest request = ChatRequest.createRequest(Command.INIT_ALIAS, alias);
         testClient.write(request.getFormattedMessage());
