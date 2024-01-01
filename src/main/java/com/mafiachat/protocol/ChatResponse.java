@@ -14,8 +14,4 @@ public class ChatResponse extends ChatData {
     public static ChatResponse createNormalResponse(String body) {
         return createResponse(Command.NORMAL, body);
     }
-
-    public static ChatResponse createAliasInitResponse(ResultType resultType) {
-        return createResponse(Command.INIT_ALIAS, resultType.name());
-    }
 }
