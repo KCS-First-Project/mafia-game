@@ -11,30 +11,32 @@ import static network.server.GroupManager.broadcastNewChatter;
 import static network.server.GroupManager.removeMessageHandler;
 import static network.server.GroupManager.sendWhisper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import network.constant.ChatCommandUtil;
 import network.exception.NoResourceException;
-import network.server.domain.ChatParticipant;
-import network.server.domain.ClientCommunicationHandler;
 
 
 public class ClientHandler implements Runnable, MessageHandler {
     private static final String INVALID_WHISPER = "Invalid whisper format.";
-    private ChatParticipant chatParticipant;
-    private ClientCommunicationHandler communicationHandler;
-    private GroupManager groupManager;
+    private Socket socket;
+    private BufferedReader br;
+    private PrintWriter pw;
+    private String chatName, id, host;
 
-    public ClientHandler(Socket socket) throws IOException {
-        communicationHandler = ClientCommunicationHandler.createClientCommunicationHandler(socket);
-        groupManager = GroupManager.createGroupManager();
-        chatParticipant = ChatParticipant.createChatParticipant(null, null, socket.getInetAddress().getHostAddress());
-        addMessageHandler(groupManager.getClientGroup(), this);
+    public ClientHandler(Socket s) throws IOException {
+        initializeClientHandler(s);
     }
 
-
-    public GroupManager getGroupManager() {
-        return groupManager;
+    private void initializeClientHandler(Socket s) throws IOException {
+        socket = s;
+        host = socket.getInetAddress().getHostAddress();
+        br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        pw = new PrintWriter(socket.getOutputStream(), true);
+        addMessageHandler(this);
     }
 
     @Override
@@ -58,43 +60,47 @@ public class ClientHandler implements Runnable, MessageHandler {
     }
 
     private void cleanUp() {
-        removeMessageHandler(groupManager.getClientGroup(), this);
+        removeMessageHandler(this);
         close();
         cleanup();
     }
 
     @Override
     public void sendMessage(String msg) {
-        communicationHandler.sendMessage(msg);
+        pw.println(msg);
     }
 
     @Override
     public String getMessage() throws IOException {
-        return communicationHandler.getMessage();
+        return br.readLine();
     }
 
     @Override
     public void close() {
-        communicationHandler.close();
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public String getId() {
-        return chatParticipant.getId();
+        return id;//socket.getRemoteSocketAddress().toString();
     }
 
     @Override
     public String getFrom() {
-        return chatParticipant.getFrom();
+        return host;
     }
 
     @Override
     public String getName() {
-        return chatParticipant.getName();
+        return chatName;
     }
 
     public void processMessage(String msg) {
-        String command = ChatCommandUtil.getCommand(msg);
+        String command = ChatCommandUtil.parseCommand(msg);
         msg = formattingMessage(msg);
 
         if (command.equals(ChatCommandUtil.NORMAL.getCommand())) {
@@ -114,7 +120,7 @@ public class ClientHandler implements Runnable, MessageHandler {
 
     private void handleNormalMessage(String msg) {
         String formattedMessage = formatChatMessage(msg);
-        broadcastMessage(groupManager.getClientGroup(), formattedMessage);
+        broadcastMessage(formattedMessage);
     }
 
     private void handleWhisperMessage(String msg) {
@@ -125,17 +131,18 @@ public class ClientHandler implements Runnable, MessageHandler {
         String toId = msg.substring(0, delimiterIndex);
         String msgToWhisper = msg.substring(delimiterIndex + 1);
         String formattedWhisper = formatChatMessage(msgToWhisper);
-        sendWhisper(groupManager.getClientGroup(), this, toId, formattedWhisper);
+        sendWhisper(this, toId, formattedWhisper);
     }
 
 
     private void handleInitAliasMessage(String msg) {
         String[] nameWithId = msg.split("\\|");
-        chatParticipant.changeNameAndId(nameWithId);
-        broadcastNewChatter(groupManager.getClientGroup(), this);
+        chatName = nameWithId[0];
+        id = nameWithId[1];
+        broadcastNewChatter(this);
     }
 
     private String formatChatMessage(String message) {
-        return String.format("%s: %s", chatParticipant.getName(), message);
+        return String.format("%s: %s", chatName, message);
     }
 }

@@ -14,8 +14,6 @@ import java.net.Socket;
 public class MafiaServer implements Runnable {
     private final ServerSocket serverSocket;
 
-    private ClientHandler clientHandler;
-
     public MafiaServer() throws IOException {
         serverSocket = new ServerSocket(PORT);
         printServerListeningMessage(PORT);
@@ -25,7 +23,7 @@ public class MafiaServer implements Runnable {
     private void shutdownHook() {
         try {
             serverSocket.close();
-            GroupManager.closeAllMessageHandlers(clientHandler.getGroupManager().getClientGroup());
+            GroupManager.closeAllMessageHandlers();
         } catch (IOException e) {
             e.printStackTrace();
         }
