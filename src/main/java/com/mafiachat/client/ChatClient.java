@@ -1,4 +1,4 @@
-//package main.java.com.mafiachat.client;
+//package com.mafiachat.client;
 //
 //import java.awt.BorderLayout;
 //import java.awt.event.WindowAdapter;
@@ -6,8 +6,8 @@
 //import javax.swing.BorderFactory;
 //import javax.swing.JFrame;
 //import javax.swing.JPanel;
-//import main.java.com.mafiachat.client.domain.ConnectionManagerImpl;
-//import main.java.com.mafiachat.client.event.ConnectionManager;
+//import com.mafiachat.client.domain.ConnectionManagerImpl;
+//import com.mafiachat.client.event.ConnectionManager;
 //
 //public class ChatClient extends WindowAdapter {
 //    private static final String CHAT_WINDOW_TITLE = "Minimal Chat - Concept Proof";

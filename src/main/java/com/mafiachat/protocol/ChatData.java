@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.protocol;
+package com.mafiachat.protocol;
 
 public class ChatData {
     protected final String formattedMessage;

@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.client.event;
+package com.mafiachat.client.event;
 
 import java.io.IOException;
 

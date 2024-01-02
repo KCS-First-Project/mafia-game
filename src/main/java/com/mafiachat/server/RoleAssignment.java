@@ -1,7 +1,7 @@
-package main.java.com.mafiachat.server;
+package com.mafiachat.server;
 
 
-import static main.java.com.mafiachat.util.Constant.MIN_PLAYER_NUMBER;
+import static com.mafiachat.util.Constant.MIN_PLAYER_NUMBER;
 
 import java.util.HashMap;
 

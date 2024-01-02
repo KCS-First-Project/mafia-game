@@ -1,7 +1,7 @@
-package main.java.com.mafiachat.server.handler;
+package com.mafiachat.server.handler;
 
 
-import static main.java.com.mafiachat.util.Constant.BASIC_CHAT_NAME;
+import static com.mafiachat.util.Constant.BASIC_CHAT_NAME;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,13 +9,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Logger;
-import main.java.com.mafiachat.protocol.ChatRequest;
-import main.java.com.mafiachat.protocol.Command;
-import main.java.com.mafiachat.server.Role;
-import main.java.com.mafiachat.server.handler.Player.Player;
-import main.java.com.mafiachat.server.handler.Player.PlayerCommand;
-import main.java.com.mafiachat.server.manager.GameManager;
-import main.java.com.mafiachat.server.manager.GroupManager;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+import com.mafiachat.server.Role;
+import com.mafiachat.server.handler.Player.Player;
+import com.mafiachat.server.handler.Player.PlayerCommand;
+import com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GroupManager;
 
 public class PlayerHandler implements Runnable, ClientHandler {
     private final Socket socket;

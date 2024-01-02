@@ -1,16 +1,16 @@
-package test.java.com.mafiachat.server;
+package com.mafiachat.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import main.java.com.mafiachat.protocol.ChatRequest;
-import main.java.com.mafiachat.protocol.ChatResponse;
-import main.java.com.mafiachat.protocol.Command;
-import main.java.com.mafiachat.server.ChatServer;
-import main.java.com.mafiachat.util.Constant;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.ChatResponse;
+import com.mafiachat.protocol.Command;
+import com.mafiachat.server.ChatServer;
+import com.mafiachat.util.Constant;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import test.java.com.mafiachat.util.TestClient;
+import com.mafiachat.util.TestClient;
 
 public class ChatServerTest {
     @Test

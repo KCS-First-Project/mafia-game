@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.client.domain;
+package com.mafiachat.client.domain;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

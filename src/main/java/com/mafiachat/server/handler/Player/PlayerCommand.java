@@ -1,12 +1,12 @@
-package main.java.com.mafiachat.server.handler.Player;
+package com.mafiachat.server.handler.Player;
 
-import main.java.com.mafiachat.protocol.ChatRequest;
-import main.java.com.mafiachat.server.Phase;
-import main.java.com.mafiachat.server.Role;
-import main.java.com.mafiachat.server.handler.ClientHandler;
-import main.java.com.mafiachat.server.handler.PlayerHandler;
-import main.java.com.mafiachat.server.manager.GameManager;
-import main.java.com.mafiachat.server.manager.GroupManager;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.server.Phase;
+import com.mafiachat.server.Role;
+import com.mafiachat.server.handler.ClientHandler;
+import com.mafiachat.server.handler.PlayerHandler;
+import com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GroupManager;
 
 public class PlayerCommand implements Player {
 

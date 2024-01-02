@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.protocol;
+package com.mafiachat.protocol;
 
 public enum Command {
     //Chat 관련

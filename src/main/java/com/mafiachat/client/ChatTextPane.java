@@ -1,4 +1,4 @@
-//package main.java.com.mafiachat.client;
+//package com.mafiachat.client;
 //
 //import java.awt.Color;
 //import javax.swing.JTextPane;
@@ -9,7 +9,7 @@
 //import javax.swing.text.SimpleAttributeSet;
 //import javax.swing.text.StyleConstants;
 //import javax.swing.text.StyleContext;
-//import main.java.com.mafiachat.protocol.Command;
+//import com.mafiachat.protocol.Command;
 //
 //public class ChatTextPane extends JTextPane {
 //    private static final long serialVersionUID = 1L;

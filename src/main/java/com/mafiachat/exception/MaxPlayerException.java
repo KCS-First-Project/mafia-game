@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.exception;
+package com.mafiachat.exception;
 
 public class MaxPlayerException extends RuntimeException {
     public MaxPlayerException() {
