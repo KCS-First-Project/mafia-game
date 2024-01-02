@@ -1,11 +1,11 @@
-package network.client;
+package main.java.com.mafiachat.client;
 
 import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import network.client.domain.StatusComponent;
-import network.client.event.ChatStatusListener;
-import network.client.event.ConnectionManager;
+import main.java.com.mafiachat.client.domain.StatusComponent;
+import main.java.com.mafiachat.client.event.ChatStatusListener;
+import main.java.com.mafiachat.client.event.ConnectionManager;
 
 @SuppressWarnings("serial")
 public class StatusBar extends JPanel implements ChatStatusListener {

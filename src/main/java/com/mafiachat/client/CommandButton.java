@@ -1,4 +1,4 @@
-package network.client;
+package main.java.com.mafiachat.client;
 
 import javax.swing.JButton;
 

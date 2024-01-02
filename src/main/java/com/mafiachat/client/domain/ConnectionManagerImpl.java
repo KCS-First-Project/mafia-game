@@ -1,16 +1,16 @@
-package network.client.domain;
+package main.java.com.mafiachat.client.domain;
 
-import static network.constant.Port.PORT;
+import static main.java.com.mafiachat.util.Constant.SERVER_PORT;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import network.client.event.ChatSocketListener;
-import network.client.event.ConnectionManager;
+import main.java.com.mafiachat.client.event.ChatSocketListener;
+import main.java.com.mafiachat.client.event.ConnectionManager;
+import main.java.com.mafiachat.util.Constant;
 
 public class ConnectionManagerImpl implements ConnectionManager {
     private Socket socket;
@@ -35,7 +35,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         }
 
         try {
-            socket = new Socket(InetAddress.getLocalHost(), PORT);
+            socket = new Socket(Constant.SERVER_HOST, SERVER_PORT);
             for (ChatSocketListener lsnr : chatSocketListeners) {
                 lsnr.socketConnected(socket);
             }

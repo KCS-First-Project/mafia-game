@@ -1,4 +1,4 @@
-package network.client.event;
+package main.java.com.mafiachat.client.event;
 
 import java.net.Socket;
 
