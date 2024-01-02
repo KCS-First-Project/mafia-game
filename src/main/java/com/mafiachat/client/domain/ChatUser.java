@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.client.domain;
+package com.mafiachat.client.domain;
 
 public class ChatUser {
     String name;

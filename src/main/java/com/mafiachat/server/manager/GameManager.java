@@ -1,7 +1,7 @@
-package main.java.com.mafiachat.server.manager;
+package com.mafiachat.server.manager;
 
 
-import static main.java.com.mafiachat.util.Constant.MIN_PLAYER_NUMBER;
+import static com.mafiachat.util.Constant.MIN_PLAYER_NUMBER;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,14 +12,14 @@ import java.util.OptionalInt;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import main.java.com.mafiachat.protocol.ChatRequest;
-import main.java.com.mafiachat.protocol.Command;
-import main.java.com.mafiachat.server.GameResult;
-import main.java.com.mafiachat.server.Phase;
-import main.java.com.mafiachat.server.Role;
-import main.java.com.mafiachat.server.RoleAssignment;
-import main.java.com.mafiachat.server.handler.ClientHandler;
-import main.java.com.mafiachat.server.handler.PlayerHandler;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+import com.mafiachat.server.GameResult;
+import com.mafiachat.server.Phase;
+import com.mafiachat.server.Role;
+import com.mafiachat.server.RoleAssignment;
+import com.mafiachat.server.handler.ClientHandler;
+import com.mafiachat.server.handler.PlayerHandler;
 
 public class GameManager {
     private static Thread gameThread = null;

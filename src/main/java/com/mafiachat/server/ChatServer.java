@@ -1,14 +1,14 @@
-package main.java.com.mafiachat.server;
+package com.mafiachat.server;
 
-import static main.java.com.mafiachat.util.Constant.SERVER_PORT;
+import static com.mafiachat.util.Constant.SERVER_PORT;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
-import main.java.com.mafiachat.server.handler.PlayerHandler;
-import main.java.com.mafiachat.server.manager.GroupManager;
+import com.mafiachat.server.handler.PlayerHandler;
+import com.mafiachat.server.manager.GroupManager;
 
 public class ChatServer implements Runnable {
     private final ServerSocket serverSocket;

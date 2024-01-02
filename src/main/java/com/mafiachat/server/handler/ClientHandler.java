@@ -1,7 +1,7 @@
-package main.java.com.mafiachat.server.handler;
+package com.mafiachat.server.handler;
 
 import java.io.IOException;
-import main.java.com.mafiachat.protocol.ChatData;
+import com.mafiachat.protocol.ChatData;
 
 public interface ClientHandler {
     public int getId();

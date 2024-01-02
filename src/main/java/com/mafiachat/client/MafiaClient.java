@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.client;
+package com.mafiachat.client;
 
 //public class MafiaClient {
 //    public static void main(String[] args) {

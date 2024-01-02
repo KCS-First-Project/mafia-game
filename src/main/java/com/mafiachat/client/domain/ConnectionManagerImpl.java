@@ -1,6 +1,6 @@
-package main.java.com.mafiachat.client.domain;
+package com.mafiachat.client.domain;
 
-import static main.java.com.mafiachat.util.Constant.SERVER_PORT;
+import static com.mafiachat.util.Constant.SERVER_PORT;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import main.java.com.mafiachat.client.event.ChatSocketListener;
-import main.java.com.mafiachat.client.event.ConnectionManager;
-import main.java.com.mafiachat.util.Constant;
+import com.mafiachat.client.event.ChatSocketListener;
+import com.mafiachat.client.event.ConnectionManager;
+import com.mafiachat.util.Constant;
 
 public class ConnectionManagerImpl implements ConnectionManager {
     private Socket socket;

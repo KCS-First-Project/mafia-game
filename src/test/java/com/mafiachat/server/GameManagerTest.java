@@ -1,10 +1,10 @@
-package test.java.com.mafiachat.server;
+package com.mafiachat.server;
 
 import java.io.IOException;
 import java.util.List;
-import main.java.com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GameManager;
 import org.junit.jupiter.api.Test;
-import test.java.com.mafiachat.util.TestClient;
+import com.mafiachat.util.TestClient;
 
 public class GameManagerTest {
     @Test

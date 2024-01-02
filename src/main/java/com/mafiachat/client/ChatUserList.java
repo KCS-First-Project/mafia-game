@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.client;
+package com.mafiachat.client;
 
 import java.awt.Component;
 import java.util.List;
@@ -6,7 +6,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import main.java.com.mafiachat.client.domain.ChatUser;
+import com.mafiachat.client.domain.ChatUser;
 
 @SuppressWarnings("serial")
 public class ChatUserList extends JList<ChatUser> {

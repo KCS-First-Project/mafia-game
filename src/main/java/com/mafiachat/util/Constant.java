@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.util;
+package com.mafiachat.util;
 
 public class Constant {
     public static final String SERVER_HOST = "localhost";

@@ -1,4 +1,4 @@
-//package main.java.com.mafiachat.client;
+//package com.mafiachat.client;
 //
 //import java.awt.GridBagConstraints;
 //import java.awt.GridBagLayout;
@@ -15,12 +15,12 @@
 //import javax.swing.JPanel;
 //import javax.swing.JScrollPane;
 //import javax.swing.JTextField;
-//import main.java.com.mafiachat.View.client.ChatPanelResponseView;
-//import main.java.com.mafiachat.client.domain.ChatUser;
-//import main.java.com.mafiachat.client.event.ChatSocketListener;
-//import main.java.com.mafiachat.client.event.ConnectionManager;
-//import main.java.com.mafiachat.client.event.MessageReceiver;
-//import main.java.com.mafiachat.protocol.Command;
+//import com.mafiachat.View.client.ChatPanelResponseView;
+//import com.mafiachat.client.domain.ChatUser;
+//import com.mafiachat.client.event.ChatSocketListener;
+//import com.mafiachat.client.event.ConnectionManager;
+//import com.mafiachat.client.event.MessageReceiver;
+//import com.mafiachat.protocol.Command;
 //
 //@SuppressWarnings("serial")
 //public class ChatPanel extends JPanel implements MessageReceiver, ActionListener, ChatSocketListener {

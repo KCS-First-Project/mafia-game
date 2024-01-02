@@ -1,7 +1,7 @@
-package main.java.com.mafiachat.server;
+package com.mafiachat.server;
 
 
-import static main.java.com.mafiachat.util.Constant.THOUSAND_MILLI_SECOND;
+import static com.mafiachat.util.Constant.THOUSAND_MILLI_SECOND;
 
 public enum Phase {
     LOBBY(0, ""),

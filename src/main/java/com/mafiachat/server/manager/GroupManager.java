@@ -1,7 +1,7 @@
-package main.java.com.mafiachat.server.manager;
+package com.mafiachat.server.manager;
 
 
-import static main.java.com.mafiachat.util.Constant.MAX_PLAYER_NUMBER;
+import static com.mafiachat.util.Constant.MAX_PLAYER_NUMBER;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,11 +10,11 @@ import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import main.java.com.mafiachat.exception.MaxPlayerException;
-import main.java.com.mafiachat.protocol.ChatRequest;
-import main.java.com.mafiachat.protocol.ChatResponse;
-import main.java.com.mafiachat.protocol.Command;
-import main.java.com.mafiachat.server.handler.ClientHandler;
+import com.mafiachat.exception.MaxPlayerException;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.ChatResponse;
+import com.mafiachat.protocol.Command;
+import com.mafiachat.server.handler.ClientHandler;
 
 public class GroupManager {
     private static final String ENTER_ROOM = " has just left chat room";

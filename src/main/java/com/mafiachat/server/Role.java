@@ -1,4 +1,4 @@
-package main.java.com.mafiachat.server;
+package com.mafiachat.server;
 
 public enum Role {
     CITIZEN("시민"),
