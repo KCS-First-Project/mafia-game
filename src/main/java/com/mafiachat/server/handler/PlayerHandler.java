@@ -97,7 +97,8 @@ public class PlayerHandler implements Runnable, ClientHandler {
                 player.talk(request);
                 break;
             case INIT_ALIAS:
-                player.initAlias(request, this);
+                player.setChatName(request.getBody());
+                GroupManager.broadcastNewChatter(this);
                 break;
             case READY:
                 setReady();
@@ -107,7 +108,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
                 player.vote(request);
                 break;
             case ACT_ROLE:
-                player.targetPlayer(request, this);
+                player.targetPlayer(request, player.getRole());
                 break;
             default:
                 logger.info(String.format("ChatCommand %s \n", command.name()));

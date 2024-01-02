@@ -8,11 +8,9 @@ import com.mafiachat.server.handler.PlayerHandler;
 public interface Playable {
     void talk(ChatRequest request);
 
-    void initAlias(ChatRequest request, ClientHandler newHandler);
-
     void vote(ChatRequest request);
 
-    void targetPlayer(ChatRequest request, PlayerHandler caller);
+    void targetPlayer(ChatRequest request, Role role);
 
     String getChatName();
 
@@ -21,6 +19,8 @@ public interface Playable {
     boolean isReady();
 
     boolean isAlive();
+
+    void setChatName(String chatName);
 
     void setRole(Role role);
 

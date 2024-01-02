@@ -27,22 +27,16 @@ public class Player implements Playable {
     }
 
     @Override
-    public void initAlias(ChatRequest request, ClientHandler newHandler) {
-        chatName = request.getBody();
-        GroupManager.broadcastNewChatter(newHandler);
-    }
-
-    @Override
     public void vote(ChatRequest request) {
         int id = Integer.parseInt(request.getBody());
         GameManager.vote(id);
     }
 
     @Override
-    public void targetPlayer(ChatRequest request, PlayerHandler caller) {
+    public void targetPlayer(ChatRequest request, Role role) {
         int id = Integer.parseInt(request.getBody());
         PlayerHandler target = (PlayerHandler) GroupManager.findClientById(id);
-        GameManager.setTargetPlayer(caller, target);
+        GameManager.setTargetPlayer(role, target);
     }
 
     @Override
@@ -63,6 +57,11 @@ public class Player implements Playable {
     @Override
     public boolean isAlive() {
         return this.alive;
+    }
+
+    @Override
+    public void setChatName(String chatName) {
+        this.chatName = chatName;
     }
 
     @Override

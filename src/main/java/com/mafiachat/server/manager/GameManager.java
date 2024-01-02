@@ -106,18 +106,18 @@ public class GameManager {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    synchronized public static void setTargetPlayer(PlayerHandler caller, PlayerHandler target) {
-        if (caller.getRole() == Role.CITIZEN) {
+    synchronized public static void setTargetPlayer(Role role, PlayerHandler target) {
+        if (role == Role.CITIZEN) {
             return;
         }
         if (!target.isAlive()) {
             return;
         }
-        PlayerHandler old = role2TargetPlayer.getOrDefault(caller.getRole(), null);
+        PlayerHandler old = role2TargetPlayer.getOrDefault(role, null);
         if (old != null) {
             return;
         }
-        role2TargetPlayer.put(caller.getRole(), target);
+        role2TargetPlayer.put(role, target);
     }
 
     public static void broadcastNormalRoleMessage(Role role, ChatRequest request) {
