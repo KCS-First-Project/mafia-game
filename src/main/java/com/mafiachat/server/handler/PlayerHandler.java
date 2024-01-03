@@ -1,8 +1,6 @@
 package com.mafiachat.server.handler;
 
 
-import static com.mafiachat.util.Constant.BASIC_CHAT_NAME;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,8 +10,8 @@ import java.util.logging.Logger;
 import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.Command;
 import com.mafiachat.server.Role;
+import com.mafiachat.server.handler.Player.Playable;
 import com.mafiachat.server.handler.Player.Player;
-import com.mafiachat.server.handler.Player.PlayerCommand;
 import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 
@@ -23,11 +21,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
     private final PrintWriter pw;
     private final String host;
     private final int id;
-    private String chatName;
-    private boolean ready = false;
-    private boolean alive = true;
-    private Role role;
-    private Player player;
+    private Playable player;
     private static final Logger logger = Logger.getLogger(PlayerHandler.class.getSimpleName());
 
     public PlayerHandler(Socket socket) throws IOException {
@@ -36,8 +30,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
         this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
         this.pw = new PrintWriter(this.socket.getOutputStream(), true);
         this.id = GroupManager.createClientId();
-        this.chatName = BASIC_CHAT_NAME;
-        this.player = new PlayerCommand();
+        this.player = new Player();
         GroupManager.addClientHandler(this);
         GameManager.addPlayerHandler(this);
     }
@@ -69,7 +62,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
 
     @Override
     public String getClientName() {
-        return this.chatName;
+        return player.getChatName();
     }
 
     @Override
@@ -101,10 +94,11 @@ public class PlayerHandler implements Runnable, ClientHandler {
         Command command = request.getCommand();
         switch (command) {
             case NORMAL:
-                player.sendNormalMessage(request, role);
+                player.talk(request);
                 break;
             case INIT_ALIAS:
-                player.initAlias(chatName, request, this);
+                player.setChatName(request.getBody());
+                GroupManager.broadcastNewChatter(this);
                 break;
             case READY:
                 setReady();
@@ -114,7 +108,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
                 player.vote(request);
                 break;
             case ACT_ROLE:
-                player.targetPlayer(request, this);
+                player.targetPlayer(request, player.getRole());
                 break;
             default:
                 logger.info(String.format("ChatCommand %s \n", command.name()));
@@ -123,27 +117,27 @@ public class PlayerHandler implements Runnable, ClientHandler {
 
 
     public Role getRole() {
-        return this.role;
+        return player.getRole();
     }
 
     public boolean isReady() {
-        return this.ready;
+        return player.isReady();
     }
 
     public boolean isAlive() {
-        return this.alive;
+        return player.isAlive();
     }
 
     public void setRole(Role role) {
-        this.role = role;
+        player.setRole(role);
     }
 
     public void setReady() {
-        this.ready = true;
+        player.setReady();
     }
 
     public void killInGame() {
-        this.alive = false;
+        player.killInGame();
     }
 
 
