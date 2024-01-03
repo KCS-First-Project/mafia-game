@@ -2,13 +2,13 @@ package com.mafiachat.server;
 
 import static com.mafiachat.util.Constant.SERVER_PORT;
 
+import com.mafiachat.server.handler.PlayerHandler;
+import com.mafiachat.server.manager.GroupManager;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
-import com.mafiachat.server.handler.PlayerHandler;
-import com.mafiachat.server.manager.GroupManager;
 
 public class ChatServer implements Runnable {
     private final ServerSocket serverSocket;
@@ -22,7 +22,7 @@ public class ChatServer implements Runnable {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdownHook()));
     }
 
-    private void shutdownHook() {
+    public void shutdownHook() {
         try {
             serverSocket.close();
             GroupManager.closeAllMessageHandlers();
