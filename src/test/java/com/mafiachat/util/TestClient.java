@@ -7,10 +7,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public class TestClient {
     private final BufferedReader reader;
     private final PrintWriter writer;
+
+    private Logger logger = Logger.getLogger(TestClient.class.getSimpleName());
 
     public TestClient(String ip, int port) throws IOException {
         Socket socket = new Socket(ip, port);
@@ -18,7 +21,7 @@ public class TestClient {
         this.writer = new PrintWriter(socket.getOutputStream(), true);
         InputStream is = socket.getInputStream();
         this.reader = new BufferedReader(new InputStreamReader(is));
-        System.out.println("TestClient created");
+        logger.info("TestClient created");
     }
 
     public void write(String msg) {
