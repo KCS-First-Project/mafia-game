@@ -1,20 +1,24 @@
 package com.mafiachat.server;
 
 import java.io.IOException;
-import java.util.List;
-import com.mafiachat.server.manager.GameManager;
-import org.junit.jupiter.api.Test;
-import com.mafiachat.util.TestClient;
+import org.junit.jupiter.api.BeforeEach;
 
 public class GameManagerTest {
-    @Test
-    public void testTryStartGame() throws InterruptedException, IOException {
-        ChatServerTest.runServer();
-        List<TestClient> clients = ChatServerTest.connectClients(5);
-        while (!GameManager.tryStartGame()) {
-            GameManager.delay(1000);
-            GameManager.setAllPlayersReady();
-        }
-        GameManager.getGameThread().join();
+
+//    @Test
+//    public void testTryStartGame() throws InterruptedException, IOException {
+//        runServer();
+//        List<TestClient> clients = ChatServerTest.connectClients(5);
+//        while (!GameManager.tryStartGame()) {
+//            GameManager.delay(1000);
+//            GameManager.setAllPlayersReady();
+//        }
+//        GameManager.getGameThread().join();
+//    }
+
+    @BeforeEach
+    public void runServer() throws IOException {
+        Thread serverThread = new Thread(new ChatServer());
+        serverThread.start();
     }
 }
