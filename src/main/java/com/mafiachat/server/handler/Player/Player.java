@@ -12,31 +12,36 @@ import static com.mafiachat.util.Constant.BASIC_CHAT_NAME;
 
 public class Player implements Playable {
 
+    private final GameManager gameManager;
     private String chatName = BASIC_CHAT_NAME;
     private Role role;
     private boolean ready = false;
     private boolean alive = true;
 
+    public Player(GameManager gameManager){
+        this.gameManager = gameManager;
+    }
+
     @Override
     public void talk(ChatRequest request) {
-        if ((GameManager.getPhase() == Phase.NIGHT) && (role != Role.CITIZEN)) {
-            GameManager.broadcastNormalRoleMessage(role, request);
+        if ((gameManager.getPhase() == Phase.NIGHT) && (role != Role.CITIZEN)) {
+            gameManager.broadcastNormalRoleMessage(role, request);
         } else {
-            GroupManager.broadcastMessage(request);
+            gameManager.broadcastMessage(request);
         }
     }
 
     @Override
     public void vote(ChatRequest request) {
         int id = Integer.parseInt(request.getBody());
-        GameManager.vote(id);
+        gameManager.vote(id);
     }
 
     @Override
     public void targetPlayer(ChatRequest request, Role role) {
         int id = Integer.parseInt(request.getBody());
-        PlayerHandler target = (PlayerHandler) GroupManager.findClientById(id);
-        GameManager.setTargetPlayer(role, target);
+        PlayerHandler target = gameManager.findPlayerById(id);
+        gameManager.setTargetPlayer(role, target);
     }
 
     @Override
