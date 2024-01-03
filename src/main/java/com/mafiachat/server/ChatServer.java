@@ -32,12 +32,11 @@ public class ChatServer implements Runnable {
     }
 
     public void run() {
-        Socket s = null;
         try {
             while (true) {
-                s = serverSocket.accept();
-                logger.info(String.format("Client[%s] accepted\n", s.getInetAddress().getHostName()));
-                new Thread(new PlayerHandler(s)).start();
+                Socket socket = serverSocket.accept();
+                logger.info(String.format("Client[%s] accepted\n", socket.getInetAddress().getHostName()));
+                new Thread(new PlayerHandler(socket)).start();
             }
         } catch (IOException e) {
             logger.severe("Terminating ChatServer: " + e.getMessage());

@@ -15,8 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ChatServerTest {
 
-    @Mock
-    ChatServer chatServer;
+
+    private ChatServer chatServer;
 
     @Mock
     Thread serverThread;
