@@ -23,6 +23,7 @@ public class ChatPanel extends JPanel {
 		chatDispArea = new ChatTextPane();//new ChatTextArea();
 		userList = new ChatUserList();
 		userList.setBackground(new Color(217,217,217));
+		chatDispArea.setBackground(new Color(217,217,217));
 		Ready = new JButton("Ready");
 		
 		chatTextField.setEnabled(true);
@@ -70,7 +71,7 @@ public class ChatPanel extends JPanel {
 		c.insets = new Insets(1, 2, 0, 2);
 		JScrollPane scrollPane = new JScrollPane(chatDispArea);
 		
-		scrollPane.setViewportBorder(new RoundBorder(15));
+//		scrollPane.setViewportBorder(new RoundBorder(15));
 		
 		add(scrollPane, c);
 		
