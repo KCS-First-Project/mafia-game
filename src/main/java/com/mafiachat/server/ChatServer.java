@@ -14,8 +14,8 @@ import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 
 public class ChatServer implements Runnable {
-    GroupManager groupManager;
-    GameManager gameManager;
+    private final GroupManager groupManager;
+    private final GameManager gameManager;
     private final ServerSocket serverSocket;
     private static final Logger logger = Logger.getLogger(ChatServer.class.getSimpleName());
 
