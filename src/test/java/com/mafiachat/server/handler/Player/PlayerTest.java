@@ -4,9 +4,8 @@ import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.Command;
 import com.mafiachat.server.ChatServer;
 import com.mafiachat.server.manager.GameManager;
-import java.io.IOException;
-
 import com.mafiachat.server.manager.GroupManager;
+import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,10 +47,24 @@ class PlayerTest {
 
         //when
         player.vote(request);
-//        doCallRealMethod().when(player).vote(isA(ChatRequest.class));
-//        player.vote(request);
 
         //then
         Assertions.assertEquals(voteCount, GameManager.getInstance().getVoteCountById(1));
     }
+
+//    @DisplayName("밤에 시민이 아닌 역할들 대화 테스트")
+//    @ParameterizedTest(name = "{index} {displayName} message = {0}")
+//    @EnumSource(value = Role.class, names = {"MAFIA", "DOCTOR", "POLICE"})
+//    public void talk(Role role) {
+//        //given
+//        ChatRequest request = ChatRequest.createRequest(, "1");
+//
+//        //when
+//        player.talk(request);
+//
+//        //then
+//        Assertions.assertEquals(voteCount, GameManager.getInstance().getVoteCountById(1));
+//    }
+
+
 }
