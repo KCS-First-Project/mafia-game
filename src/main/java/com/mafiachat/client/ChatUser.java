@@ -1,4 +1,4 @@
-package com.mafiachat.server.client;
+package com.mafiachat.client;
 
 public class ChatUser {
 	String name;

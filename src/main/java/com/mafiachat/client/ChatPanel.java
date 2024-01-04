@@ -1,13 +1,10 @@
-package com.mafiachat.server.client;
+package com.mafiachat.client;
 
-import java.net.*;
 import java.io.*;
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 
-import java.util.*;
 @SuppressWarnings("serial")
 public class ChatPanel extends JPanel {
 	JTextField chatTextField;

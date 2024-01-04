@@ -1,4 +1,4 @@
-package com.mafiachat.server.client;
+package com.mafiachat.client;
 
 import java.awt.Color;
 import java.awt.Font;

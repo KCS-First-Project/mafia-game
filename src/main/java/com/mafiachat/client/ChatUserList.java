@@ -1,4 +1,4 @@
-package com.mafiachat.server.client;
+package com.mafiachat.client;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
