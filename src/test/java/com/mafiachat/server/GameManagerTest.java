@@ -9,12 +9,13 @@ import com.mafiachat.util.TestClient;
 public class GameManagerTest {
     @Test
     public void testTryStartGame() throws InterruptedException, IOException {
+        GameManager gameManager = GameManager.getInstance();
         ChatServerTest.runServer();
         List<TestClient> clients = ChatServerTest.connectClients(5);
-        while (!GameManager.tryStartGame()) {
-            GameManager.delay(1000);
-            GameManager.setAllPlayersReady();
+        while (!gameManager.tryStartGame()) {
+            gameManager.delay(1000);
+            gameManager.setAllPlayersReady();
         }
-        GameManager.getGameThread().join();
+        gameManager.getGameThread().join();
     }
 }

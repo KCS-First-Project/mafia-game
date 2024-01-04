@@ -22,25 +22,35 @@ import com.mafiachat.server.handler.ClientHandler;
 import com.mafiachat.server.handler.PlayerHandler;
 
 public class GameManager {
-    private static Thread gameThread = null;
-    private static Phase phase = Phase.LOBBY;
-    private static final List<PlayerHandler> playerGroup = Collections.synchronizedList(new ArrayList<>());
-    private static final HashMap<Integer, Integer> id2VoteCount = new HashMap<>();
-    private static final HashMap<Role, PlayerHandler> role2TargetPlayer = new HashMap<>();
-    private static final Logger logger = Logger.getLogger(GameManager.class.getSimpleName());
+    private GroupManager groupManager;
+    private Thread gameThread = null;
+    private Phase phase = Phase.LOBBY;
+    private final List<PlayerHandler> playerGroup = Collections.synchronizedList(new ArrayList<>());
+    private final HashMap<Integer, Integer> id2VoteCount = new HashMap<>();
+    private final HashMap<Role, PlayerHandler> role2TargetPlayer = new HashMap<>();
+    private final Logger logger = Logger.getLogger(GameManager.class.getSimpleName());
 
-    private GameManager() {
+    private GameManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
     }
 
-    public static void addPlayerHandler(PlayerHandler handler) {
+    public static GameManager getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
+    public void setGroupManager(GroupManager groupManager){
+        this.groupManager = groupManager;
+    }
+
+    public void addPlayerHandler(PlayerHandler handler) {
         playerGroup.add(handler);
     }
 
-    public static void removePlayerHandler(PlayerHandler handler) {
+    public void removePlayerHandler(PlayerHandler handler) {
         playerGroup.remove(handler);
     }
 
-    synchronized public static boolean tryStartGame() {
+    synchronized public boolean tryStartGame() {
         if (playerGroup.size() < MIN_PLAYER_NUMBER) {
             logger.info("5인 이상부터 플레이 가능합니다.");
             return false;
@@ -63,11 +73,11 @@ public class GameManager {
         return true;
     }
 
-    public static Phase getPhase() {
+    public Phase getPhase() {
         return phase;
     }
 
-    public static void delay(int milliSeconds) throws InterruptedException {
+    public void delay(int milliSeconds) throws InterruptedException {
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(milliSeconds);
@@ -79,21 +89,21 @@ public class GameManager {
         thread.join();
     }
 
-    public static void setAllPlayersReady() {
+    public void setAllPlayersReady() {
         //디버그용
         playerGroup.forEach(PlayerHandler::setReady);
     }
 
-    synchronized public static void vote(int id) {
+    synchronized public void vote(int id) {
         int voteCount = id2VoteCount.getOrDefault(id, 0);
         id2VoteCount.put(id, voteCount);
     }
 
-    public static int getVoteCountById(int id) {
+    public int getVoteCountById(int id) {
         return id2VoteCount.getOrDefault(id, 0);
     }
 
-    public static List<Integer> getMostVotedPlayerIds() {
+    public List<Integer> getMostVotedPlayerIds() {
         OptionalInt maxVoteCount = playerGroup.stream()
                 .mapToInt((c) -> getVoteCountById(c.getId()))
                 .max();
@@ -106,7 +116,7 @@ public class GameManager {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    synchronized public static void setTargetPlayer(Role role, PlayerHandler target) {
+    synchronized public void setTargetPlayer(Role role, PlayerHandler target) {
         if (role == Role.CITIZEN) {
             return;
         }
@@ -120,19 +130,27 @@ public class GameManager {
         role2TargetPlayer.put(role, target);
     }
 
-    public static void broadcastNormalRoleMessage(Role role, ChatRequest request) {
+    public void broadcastMessage(ChatRequest request){
+        groupManager.broadcastMessage(request);
+    }
+
+    public void broadcastNormalRoleMessage(Role role, ChatRequest request) {
         if (role == Role.CITIZEN) {
             return;
         }
         List<ClientHandler> players = findPlayersByRole(role);
-        GroupManager.multicastMessage(request, players);
+        groupManager.multicastMessage(request, players);
     }
 
-    public static Thread getGameThread() {
+    public Thread getGameThread() {
         return gameThread;
     }
 
-    private static void startGame() throws InterruptedException {
+    public PlayerHandler findPlayerById(int id){
+        return (PlayerHandler) groupManager.findClientById(id);
+    }
+
+    private void startGame() throws InterruptedException {
         assignRole();
         announceRole();
         phase = Phase.LOBBY;
@@ -143,7 +161,7 @@ public class GameManager {
         startDayChat();
     }
 
-    private static void startDayChat() throws InterruptedException {
+    private void startDayChat() throws InterruptedException {
         GameResult gameResult = getGameResult();
         if (gameResult != GameResult.RESUME) {
             endGame(gameResult);
@@ -154,7 +172,7 @@ public class GameManager {
         startDayFirstVote();
     }
 
-    private static void startDayFirstVote() throws InterruptedException {
+    private void startDayFirstVote() throws InterruptedException {
         id2VoteCount.clear();
 
         onPhase(Phase.DAY_FIRST_VOTE);
@@ -168,19 +186,19 @@ public class GameManager {
         }
     }
 
-    private static void startDayDefense(List<Integer> mostVotedPlayerIds) throws InterruptedException {
+    private void startDayDefense(List<Integer> mostVotedPlayerIds) throws InterruptedException {
         String announceMessage = mostVotedPlayerIds.stream()
-                .map((id) -> "%s(%d)".formatted(GroupManager.findClientNameById(id), id))
+                .map((id) -> "%s(%d)".formatted(groupManager.findClientNameById(id), id))
                 .collect(Collectors.joining(", "));
         ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
-        GroupManager.broadcastMessage(request);
+        groupManager.broadcastMessage(request);
 
         onPhase(Phase.DAY_DEFENSE);
 
         startDaySecondVote(mostVotedPlayerIds);
     }
 
-    private static void startDaySecondVote(List<Integer> mostVotedPlayerIds) throws InterruptedException {
+    private void startDaySecondVote(List<Integer> mostVotedPlayerIds) throws InterruptedException {
         id2VoteCount.clear();
 
         onPhase(Phase.DAY_SECOND_VOTE);
@@ -200,7 +218,7 @@ public class GameManager {
         }
     }
 
-    private static void startNight() throws InterruptedException {
+    private void startNight() throws InterruptedException {
         onPhase(Phase.NIGHT);
 
         PlayerHandler killedByMafia = applyRoleAction();
@@ -208,42 +226,42 @@ public class GameManager {
         startDayChat();
     }
 
-    private static void endGame(GameResult gameResult) {
+    private void endGame(GameResult gameResult) {
         announceResult(gameResult);
         dismissRole();
         goToLobby();
     }
 
-    private static void goToLobby() {
+    private void goToLobby() {
         phase = Phase.LOBBY;
     }
 
-    private static boolean checkAllReady() {
+    private boolean checkAllReady() {
         Optional<Boolean> isAllReady = playerGroup.stream()
                 .map(PlayerHandler::isReady)
                 .reduce((x, y) -> x && y);
         return isAllReady.isPresent() && isAllReady.get();
     }
 
-    private static void onPhase(Phase phase) throws InterruptedException {
+    private void onPhase(Phase phase) throws InterruptedException {
         proceedPhase();
 
         ChatRequest phaseNotiRequest = ChatRequest.createRequest(Command.valueOf(phase.name()), "");
-        GroupManager.broadcastMessage(phaseNotiRequest);
+        groupManager.broadcastMessage(phaseNotiRequest);
         ChatRequest phaseAnnounceRequest = ChatRequest.createSystemRequest(phase.announceMessage);
-        GroupManager.broadcastMessage(phaseAnnounceRequest);
+        groupManager.broadcastMessage(phaseAnnounceRequest);
 
         logger.log(Level.INFO, "%s started".formatted(phase.name()));
         delay(phase.timeLimit);
         logger.log(Level.INFO, "%s ended".formatted(phase.name()));
     }
 
-    private static void proceedPhase() {
+    private void proceedPhase() {
         int nextOrdinal = (phase.ordinal() + 1) % Phase.values().length;
         phase = Phase.values()[nextOrdinal];
     }
 
-    private static void assignRole() {
+    private void assignRole() {
         Collections.shuffle(playerGroup);
         RoleAssignment roleAssignment = RoleAssignment.getAssignment(playerGroup.size());
         int index = 0;
@@ -265,20 +283,20 @@ public class GameManager {
         }
     }
 
-    private static void dismissRole() {
+    private void dismissRole() {
         playerGroup.forEach((player) -> player.setRole(null));
     }
 
-    private static PlayerHandler getPlayerToKill(List<Integer> mostVotedPlayerIds) {
+    private PlayerHandler getPlayerToKill(List<Integer> mostVotedPlayerIds) {
         if (mostVotedPlayerIds.isEmpty()) {
             return null;
         }
         Collections.shuffle(mostVotedPlayerIds);
         int votedPlayerId = mostVotedPlayerIds.get(0);
-        return (PlayerHandler) GroupManager.findClientById(votedPlayerId);
+        return (PlayerHandler) groupManager.findClientById(votedPlayerId);
     }
 
-    private static void killVotedPlayer(PlayerHandler player) {
+    private void killVotedPlayer(PlayerHandler player) {
         if (player == null) {
             return;
         }
@@ -286,7 +304,7 @@ public class GameManager {
         notifyPlayerList();
     }
 
-    private static void notifyPlayerList() {
+    private void notifyPlayerList() {
         String players = playerGroup.stream().map((player) ->
                 "%s,%s,%s,%s".formatted(
                         player.getId(),
@@ -296,10 +314,10 @@ public class GameManager {
                 )
         ).collect(Collectors.joining("|"));
         ChatRequest request = ChatRequest.createRequest(Command.PLAYER_LIST, players);
-        GroupManager.broadcastMessage(request);
+        groupManager.broadcastMessage(request);
     }
 
-    private static PlayerHandler applyRoleAction() {
+    private PlayerHandler applyRoleAction() {
         PlayerHandler mafiaTargetPlayer = role2TargetPlayer.getOrDefault(Role.MAFIA, null);
         PlayerHandler doctorTargetPlayer = role2TargetPlayer.getOrDefault(Role.DOCTOR, null);
         PlayerHandler policeTargetPlayer = role2TargetPlayer.getOrDefault(Role.POLICE, null);
@@ -319,30 +337,30 @@ public class GameManager {
         return null;
     }
 
-    private static void broadcastSystemRoleMessage(Role role, ChatRequest request) {
+    private void broadcastSystemRoleMessage(Role role, ChatRequest request) {
         if (role == Role.CITIZEN) {
             return;
         }
         List<ClientHandler> players = findPlayersByRole(role);
-        GroupManager.multicastMessage(request, players);
+        groupManager.multicastMessage(request, players);
     }
 
-    private static List<ClientHandler> findPlayersByRole(Role role) {
+    private List<ClientHandler> findPlayersByRole(Role role) {
         return playerGroup.stream()
                 .filter((p) -> p.getRole() == role)
                 .collect(Collectors.toList());
     }
 
 
-    private static void announceRole() {
+    private void announceRole() {
         for (PlayerHandler player : playerGroup) {
             ChatRequest request = ChatRequest.createSystemRequest(
                     "당신의 역할은 %s입니다.".formatted(player.getRole().description));
-            GroupManager.unicastMessage(request, player);
+            groupManager.unicastMessage(request, player);
         }
     }
 
-    private static void announceKilledPlayer(String context, PlayerHandler killedPlayer) {
+    private void announceKilledPlayer(String context, PlayerHandler killedPlayer) {
         String announceMessage;
         if (killedPlayer == null) {
             announceMessage = "%s 아무도 죽지 않았습니다.".formatted(context);
@@ -351,19 +369,19 @@ public class GameManager {
                     killedPlayer.getId());
         }
         ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
-        GroupManager.broadcastMessage(request);
+        groupManager.broadcastMessage(request);
     }
 
-    private static void announceResult(GameResult gameResult) {
+    private void announceResult(GameResult gameResult) {
         String userRoleList = playerGroup.stream()
                 .map((p) -> "%s(%d) 플레이어는 %s입니다.".formatted(p.getClientName(), p.getId(), p.getRole().description))
                 .collect(Collectors.joining("\n"));
         String announceMessage = "%s\n%s".formatted(gameResult.announceMessage, userRoleList);
         ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
-        GroupManager.broadcastMessage(request);
+        groupManager.broadcastMessage(request);
     }
 
-    private static GameResult getGameResult() {
+    private GameResult getGameResult() {
         int mafiaAliveCount = 0;
         int elseAliveCount = 0;
         for (PlayerHandler p : playerGroup) {
@@ -380,5 +398,9 @@ public class GameManager {
         } else {
             return GameResult.RESUME;
         }
+    }
+
+    private static class LazyHolder {
+        private static final GameManager INSTANCE = new GameManager(GroupManager.getInstance());
     }
 }

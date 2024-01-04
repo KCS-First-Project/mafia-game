@@ -6,7 +6,8 @@ import java.util.List;
 import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
-import com.mafiachat.server.ChatServer;
+import com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GroupManager;
 import com.mafiachat.util.Constant;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class ChatServerTest {
     }
 
     public static void runServer() throws IOException {
-        Thread serverThread = new Thread(new ChatServer());
+        Thread serverThread = new Thread(new ChatServer(GroupManager.getInstance(), GameManager.getInstance()));
         serverThread.start();
     }
 
