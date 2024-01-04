@@ -2,16 +2,15 @@ package com.mafiachat.server;
 
 import static com.mafiachat.util.Constant.SERVER_PORT;
 
+import com.mafiachat.server.handler.Player.Player;
+import com.mafiachat.server.handler.PlayerHandler;
+import com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GroupManager;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
-
-import com.mafiachat.server.handler.Player.Player;
-import com.mafiachat.server.handler.PlayerHandler;
-import com.mafiachat.server.manager.GameManager;
-import com.mafiachat.server.manager.GroupManager;
 
 public class ChatServer implements Runnable {
     private final GroupManager groupManager;
@@ -29,7 +28,7 @@ public class ChatServer implements Runnable {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdownHook()));
     }
 
-    private void shutdownHook() {
+    public void shutdownHook() {
         try {
             serverSocket.close();
             groupManager.closeAllMessageHandlers();
@@ -39,10 +38,9 @@ public class ChatServer implements Runnable {
     }
 
     public void run() {
-        Socket socket = null;
         try {
             while (true) {
-                socket = serverSocket.accept();
+                Socket socket = serverSocket.accept();
                 logger.info(String.format("Client[%s] accepted\n", socket.getInetAddress().getHostName()));
                 Player player = new Player(gameManager);
                 new Thread(new PlayerHandler(groupManager, gameManager, socket, player)).start();

@@ -3,6 +3,14 @@ package com.mafiachat.server.manager;
 
 import static com.mafiachat.util.Constant.MIN_PLAYER_NUMBER;
 
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+import com.mafiachat.server.GameResult;
+import com.mafiachat.server.Phase;
+import com.mafiachat.server.Role;
+import com.mafiachat.server.RoleAssignment;
+import com.mafiachat.server.handler.ClientHandler;
+import com.mafiachat.server.handler.PlayerHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,14 +20,6 @@ import java.util.OptionalInt;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import com.mafiachat.protocol.ChatRequest;
-import com.mafiachat.protocol.Command;
-import com.mafiachat.server.GameResult;
-import com.mafiachat.server.Phase;
-import com.mafiachat.server.Role;
-import com.mafiachat.server.RoleAssignment;
-import com.mafiachat.server.handler.ClientHandler;
-import com.mafiachat.server.handler.PlayerHandler;
 
 public class GameManager {
     private GroupManager groupManager;
@@ -96,7 +96,7 @@ public class GameManager {
 
     synchronized public void vote(int id) {
         int voteCount = id2VoteCount.getOrDefault(id, 0);
-        id2VoteCount.put(id, voteCount);
+        id2VoteCount.put(id, ++voteCount);
     }
 
     public int getVoteCountById(int id) {
