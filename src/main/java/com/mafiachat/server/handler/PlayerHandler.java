@@ -16,23 +16,27 @@ import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 
 public class PlayerHandler implements Runnable, ClientHandler {
+    private final GroupManager groupManager;
+    private final GameManager gameManager;
     private final Socket socket;
     private final BufferedReader br;
     private final PrintWriter pw;
     private final String host;
     private final int id;
-    private Playable player;
+    private final Playable player;
     private static final Logger logger = Logger.getLogger(PlayerHandler.class.getSimpleName());
 
-    public PlayerHandler(Socket socket) throws IOException {
+    public PlayerHandler(GroupManager groupManager, GameManager gameManager, Socket socket, Player player) throws IOException {
+        this.groupManager = groupManager;
+        this.gameManager = gameManager;
         this.socket = socket;
         this.host = this.socket.getInetAddress().getHostAddress();
         this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
         this.pw = new PrintWriter(this.socket.getOutputStream(), true);
-        this.id = GroupManager.createClientId();
-        this.player = new Player();
-        GroupManager.addClientHandler(this);
-        GameManager.addPlayerHandler(this);
+        this.id = groupManager.createClientId();
+        this.player = player;
+        groupManager.addClientHandler(this);
+        gameManager.addPlayerHandler(this);
     }
 
     public void run() {
@@ -48,8 +52,8 @@ public class PlayerHandler implements Runnable, ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            GroupManager.removeClientHandler(this);
-            GameManager.removePlayerHandler(this);
+            groupManager.removeClientHandler(this);
+            gameManager.removePlayerHandler(this);
             close();
         }
         logger.info("Terminating ClientHandler");
@@ -98,11 +102,11 @@ public class PlayerHandler implements Runnable, ClientHandler {
                 break;
             case INIT_ALIAS:
                 player.setChatName(request.getBody());
-                GroupManager.broadcastNewChatter(this);
+                groupManager.broadcastNewChatter(this);
                 break;
             case READY:
                 setReady();
-                GameManager.tryStartGame();
+                gameManager.tryStartGame();
                 break;
             case VOTE:
                 player.vote(request);

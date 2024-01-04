@@ -2,7 +2,9 @@ package com.mafiachat.server;
 
 import static com.mafiachat.util.Constant.SERVER_PORT;
 
+import com.mafiachat.server.handler.Player.Player;
 import com.mafiachat.server.handler.PlayerHandler;
+import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -11,10 +13,14 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 public class ChatServer implements Runnable {
+    private final GroupManager groupManager;
+    private final GameManager gameManager;
     private final ServerSocket serverSocket;
     private static final Logger logger = Logger.getLogger(ChatServer.class.getSimpleName());
 
-    public ChatServer() throws IOException {
+    public ChatServer(GroupManager groupManager, GameManager gameManager) throws IOException {
+        this.groupManager = groupManager;
+        this.gameManager = gameManager;
         serverSocket = new ServerSocket(SERVER_PORT);
         logger.info(
                 String.format("ChatServer[%s] is listening on port %s\n", InetAddress.getLocalHost().getHostAddress(),
@@ -25,7 +31,7 @@ public class ChatServer implements Runnable {
     public void shutdownHook() {
         try {
             serverSocket.close();
-            GroupManager.closeAllMessageHandlers();
+            groupManager.closeAllMessageHandlers();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -36,7 +42,8 @@ public class ChatServer implements Runnable {
             while (true) {
                 Socket socket = serverSocket.accept();
                 logger.info(String.format("Client[%s] accepted\n", socket.getInetAddress().getHostName()));
-                new Thread(new PlayerHandler(socket)).start();
+                Player player = new Player(gameManager);
+                new Thread(new PlayerHandler(groupManager, gameManager, socket, player)).start();
             }
         } catch (IOException e) {
             logger.severe("Terminating ChatServer: " + e.getMessage());
@@ -46,12 +53,12 @@ public class ChatServer implements Runnable {
 
     public void cleanup() throws IOException {
         serverSocket.close();
-        GroupManager.closeAllMessageHandlers();
+        groupManager.closeAllMessageHandlers();
     }
 
     public static void main(String[] args) {
         try {
-            Runnable r = new ChatServer();
+            Runnable r = new ChatServer(GroupManager.getInstance(), GameManager.getInstance());
             new Thread(r).start();
         } catch (IOException e) {
             logger.severe("Failed to start server: " + e.getMessage());
