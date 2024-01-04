@@ -5,6 +5,8 @@ import com.mafiachat.protocol.Command;
 import com.mafiachat.server.ChatServer;
 import com.mafiachat.server.manager.GameManager;
 import java.io.IOException;
+
+import com.mafiachat.server.manager.GroupManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,12 +24,12 @@ class PlayerTest {
     private Player player;
 
     public PlayerTest() {
-        player = new Player();
+        player = new Player(GameManager.getInstance());
     }
 
     @BeforeEach
     public void runServer() throws IOException {
-        chatServer = new ChatServer();
+        chatServer = new ChatServer(GroupManager.getInstance(), GameManager.getInstance());
         serverThread = new Thread(chatServer);
         serverThread.start();
     }
@@ -50,6 +52,6 @@ class PlayerTest {
 //        player.vote(request);
 
         //then
-        Assertions.assertEquals(voteCount, GameManager.getVoteCountById(1));
+        Assertions.assertEquals(voteCount, GameManager.getInstance().getVoteCountById(1));
     }
 }
