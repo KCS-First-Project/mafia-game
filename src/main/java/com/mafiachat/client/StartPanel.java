@@ -3,20 +3,17 @@ package com.mafiachat.client;
 import java.awt.Color;
 import java.awt.Font;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class StartPanel extends JPanel {
-	
+
 	private JLabel mafiaImage;
 	private JLabel midsLabel;
 	public JButton play;
 	private JButton quit;
+
 	StartPanel(){
-		
+
 		mafiaImage=new JLabel();
 		play= new JButton("PLAY");
 		quit=new JButton("QUIT");
@@ -31,7 +28,7 @@ public class StartPanel extends JPanel {
         quit.setBackground(new Color(255, 0, 0)); // 빨간색
         quit.setForeground(Color.WHITE); // 흰색
 		mafiaImage.setBounds(150, 50, 200, 170);
-		play.setBounds(200, 250, 100, 30); 
+		play.setBounds(200, 250, 100, 30);
 		quit.setBounds(200, 300, 100, 30);
 		mafiaImage.setIcon(new ImageIcon("images/mafia.jpeg"));
 		setLayout(null);
@@ -40,6 +37,11 @@ public class StartPanel extends JPanel {
         add(mafiaImage);
         add(play);
         add(quit);
-        
+
+		quit.addActionListener(e -> {
+			JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+			frame.dispose();
+		});
+
 	}
 }
