@@ -4,10 +4,8 @@ import java.text.SimpleDateFormat;
 
 import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.swing.text.*;
+
 public class ChatTextPane extends JTextPane{
 	private static final long serialVersionUID = 1L;
 	private SimpleDateFormat formatter = new SimpleDateFormat("MMdd_HH_mm_ss");
@@ -35,5 +33,27 @@ public class ChatTextPane extends JTextPane{
         whisperAttrSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, Color.PINK);
       //whisperAttrSet = sc.addAttribute(whisperAttrSet, StyleConstants.FontFamily, "Lucida Console");
         whisperAttrSet = sc.addAttribute(whisperAttrSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+	}
+
+	public void append(String msg) {
+		AttributeSet attrset =  normalAttrSet;
+		Document doc = getDocument();
+		int count = doc.getDefaultRootElement().getElementCount();
+		try {
+			doc.insertString(doc.getLength(), msg+"\n", attrset);
+			System.out.println("line count: " + count);
+			if(count >= maxLines) {
+				int line = count - linesToHold - 1;
+				Element map = getDocument().getDefaultRootElement();
+				Element lineElem = map.getElement(line);
+				int endOffset = lineElem.getEndOffset();
+				// hide the implicit break at the end of the document
+				endOffset = ((line == count - 1) ? (endOffset - 1) : endOffset);
+				System.out.println();
+				doc.remove(0, endOffset);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
