@@ -20,6 +20,15 @@ public class StartPanel extends JPanel {
 		Font buttonFont = new Font("Arial", Font.BOLD, 16);
         play.setFont(buttonFont);
         quit.setFont(buttonFont);
+
+		play.setOpaque(true); // 추가
+		play.setContentAreaFilled(true); // 추가
+		play.setBorderPainted(false); // 추가
+
+		quit.setOpaque(true); // 추가
+		quit.setContentAreaFilled(true); // 추가
+		quit.setBorderPainted(false); // 추가
+
         play.setBackground(new Color(0, 128, 255)); // 파란색
         play.setForeground(Color.WHITE); // 흰색
 		midsLabel=new JLabel("MIDS(Mafia Invasion Dectection System)");
