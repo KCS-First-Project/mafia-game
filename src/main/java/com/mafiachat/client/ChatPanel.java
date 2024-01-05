@@ -1,19 +1,30 @@
 package com.mafiachat.client;
 
+import com.mafiachat.client.event.ChatConnector;
+import com.mafiachat.client.event.ChatSocketListener;
+import com.mafiachat.client.event.MessageReceiver;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.*;
 import java.awt.*;
+import java.net.Socket;
 import javax.swing.*;
 import javax.swing.border.Border;
 
 @SuppressWarnings("serial")
-public class ChatPanel extends JPanel {
+public class ChatPanel extends JPanel implements MessageReceiver, ActionListener, ChatSocketListener {
 	JTextField chatTextField;
 	ChatTextPane chatDispArea;
 	ChatUserList userList;
 	JButton Ready;
 	PrintWriter writer;
 	StringBuilder msgBuilder = new StringBuilder();
-	public ChatPanel() {
+	public ChatPanel(ChatConnector c) {
 		super(new GridBagLayout());
 		initUI();
 	}
@@ -23,7 +34,6 @@ public class ChatPanel extends JPanel {
 		chatDispArea = new ChatTextPane();//new ChatTextArea();
 		userList = new ChatUserList();
 		userList.setBackground(new Color(217,217,217));
-		chatDispArea.setBackground(new Color(217,217,217));
 		Ready = new JButton("Ready");
 		
 		chatTextField.setEnabled(true);
@@ -71,7 +81,7 @@ public class ChatPanel extends JPanel {
 		c.insets = new Insets(1, 2, 0, 2);
 		JScrollPane scrollPane = new JScrollPane(chatDispArea);
 		
-//		scrollPane.setViewportBorder(new RoundBorder(15));
+		scrollPane.setViewportBorder(new RoundBorder(15));
 		
 		add(scrollPane, c);
 		
@@ -95,6 +105,42 @@ public class ChatPanel extends JPanel {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		add(chatTextField, c);
 		
+
+		Ready.addActionListener(this);
+		chatTextField.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			//엔터시채팅
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					String msgToSend = chatTextField.getText();
+					ChatRequest request = ChatRequest.createRequest(Command.NORMAL, msgToSend);
+					msgToSend=request.getFormattedMessage();
+					if(msgToSend.trim().equals("")) return;
+
+					chatTextField.setText("");
+				}
+
+			}
+
+		});
+
+
+
+
 		c = new GridBagConstraints();
 		c.gridy = 2;
 		c.gridx = 1;
@@ -115,8 +161,50 @@ public class ChatPanel extends JPanel {
 		
 		add(Ready, c);
 	}
-	
-	
+
+	@Override
+	public void socketClosed() {
+
+	}
+
+	@Override
+	public void socketConnected(Socket s) throws IOException {
+
+	}
+
+	@Override
+	public void messageArrived(ChatRequest request) {
+		Command command = request.getCommand();
+		System.out.println(request.getCommand());
+		String msg = request.getBody();
+		switch(command) {
+			case NORMAL:
+			case SYSTEM:
+			case ENTER_ROOM:
+			case EXIT_ROOM:
+				System.out.println(msg);
+				chatDispArea.append(msg);
+			case USER_LIST:
+			case PLAYER_LIST:
+			case LOBBY:
+			case DAY_CHAT:
+			case DAY_FIRST_VOTE:
+			case DAY_DEFENSE:
+			case DAY_SECOND_VOTE:
+			case NIGHT:
+			case UNKNOWN:
+			default:
+				break;
+		}
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+	}
+
+
 	private static class RoundBorder implements Border {
         private int radius;
 
