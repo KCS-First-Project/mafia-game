@@ -27,6 +27,7 @@ public class MafiaClient implements ChatConnector {
 
 	private ArrayList<ChatSocketListener> sListeners = new ArrayList<ChatSocketListener>();
 	MafiaClient() {
+		
 		startWindow = new JFrame("MafiaStart");
 		startWindow.setSize(500, 400);
 		StartPanel startPanel = new StartPanel();
@@ -50,7 +51,7 @@ public class MafiaClient implements ChatConnector {
 
 		this.addChatSocketListener(chatPanel);
 		this.addChatSocketListener(chatReceiver);
-
+		connect();
 		
 		gameWindow.setSize(500, 400);
 		gameWindow.setVisible(false);
@@ -75,6 +76,7 @@ public class MafiaClient implements ChatConnector {
 			socket = new Socket(host, port);
 			for(ChatSocketListener lsnr: sListeners) {
 				lsnr.socketConnected(socket);
+				
 			}
 			return true;
 		} catch (IOException e)
