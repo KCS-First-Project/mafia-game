@@ -15,12 +15,13 @@ public class MafiaClient {
 	public static void main(String[] args) {
 		new MafiaClient();
 	}
-	private String host;
+	private String host="192.168.203.81";
 	private int port=1223;
-	private Socket socket;
+	Socket socket;
 	private JFrame startWindow;
 	private JFrame gameWindow;
 	MafiaClient() {
+		connect();
 		startWindow = new JFrame("MafiaStart");
 		startWindow.setSize(500, 400);
 		StartPanel startPanel = new StartPanel();
@@ -32,19 +33,12 @@ public class MafiaClient {
 		
 		JPanel contentPane = new JPanel(new BorderLayout());
 		contentPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-		ChatPanel chatPanel = new ChatPanel();
+		ChatPanel chatPanel = new ChatPanel(this);
 //
 		contentPane.add(chatPanel);
-//		
+		ChatMessageReceiver chatReceiver = new ChatMessageReceiver(this);
+		chatReceiver.setMessageReceiver(chatPanel);
 		gameWindow.setContentPane(contentPane);
-		
-		
-		
-		
-		
-		
-		
-		
 		gameWindow.setSize(500, 400);
 		gameWindow.setVisible(false);
 		GamePanel gamePanel = new GamePanel();
@@ -61,15 +55,17 @@ public class MafiaClient {
 	}
 
 
-	public void connect() 
+	public boolean connect() 
 	{
 		try 
 		{
 			socket = new Socket(host, port);
+			return true;
 		} catch (IOException e) 
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 	}
 	public void disConnect() 

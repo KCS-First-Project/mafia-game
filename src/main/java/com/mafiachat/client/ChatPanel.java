@@ -1,26 +1,60 @@
 package com.mafiachat.client;
 
-import java.io.*;
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+
 @SuppressWarnings("serial")
-public class ChatPanel extends JPanel {
+public class ChatPanel extends JPanel implements ActionListener {
 	JTextField chatTextField;
 	ChatTextPane chatDispArea;
+//	TextArea chatDispArea;
 	ChatUserList userList;
 	JButton Ready;
 	PrintWriter writer;
 	StringBuilder msgBuilder = new StringBuilder();
-	public ChatPanel() {
+	private MafiaClient connector;
+	public ChatPanel(MafiaClient c) {
 		super(new GridBagLayout());
+		connector = c;
 		initUI();
+		try {
+			socketConnected(connector.socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void initUI() {
 		chatTextField = new JTextField();
-		chatDispArea = new ChatTextPane();//new ChatTextArea();
+//		chatDispArea = new ChatTextPane();//new ChatTextArea();
+		chatDispArea = new ChatTextPane();
 		userList = new ChatUserList();
 		userList.setBackground(new Color(217,217,217));
 		chatDispArea.setBackground(new Color(217,217,217));
@@ -95,6 +129,44 @@ public class ChatPanel extends JPanel {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		add(chatTextField, c);
 		
+		  
+		Ready.addActionListener(this);
+		chatTextField.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			//엔터시채팅
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					String msgToSend = chatTextField.getText();
+					ChatRequest request = ChatRequest.createRequest(Command.NORMAL, msgToSend);
+					msgToSend=request.getFormattedMessage();
+					if(msgToSend.trim().equals("")) return;
+					if(connector.socketAvailable()) {
+						sendMessage(msgToSend);
+					}
+					chatTextField.setText("");
+				}
+				
+			}
+			
+		});
+
+	
+
+
 		c = new GridBagConstraints();
 		c.gridy = 2;
 		c.gridx = 1;
@@ -117,6 +189,29 @@ public class ChatPanel extends JPanel {
 	}
 	
 	
+	
+	//메세지도착
+	public void messageArrived(String msg) {
+//		msg = msg.replaceFirst("\\[{1}[a-z]\\]{1}", "");
+		chatDispArea.append(msg + "\n");
+		}
+	//ready누르면 비활성화후 작업
+	public void actionPerformed(ActionEvent e) {
+		Object sourceObj = e.getSource();
+		if(sourceObj == Ready) {
+			Ready.setEnabled(false);
+		}
+		
+		
+	}
+	
+	private void sendMessage(String msgToSend) {
+		writer.println(msgToSend);
+	}
+
+	public void socketConnected(Socket s) throws IOException {
+		writer = new PrintWriter(s.getOutputStream(), true);
+	}
 	private static class RoundBorder implements Border {
         private int radius;
 
