@@ -130,7 +130,8 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 					ChatRequest request = ChatRequest.createRequest(Command.NORMAL, msgToSend);
 					msgToSend=request.getFormattedMessage();
 					if(msgToSend.trim().equals("")) return;
-
+					
+					writer.println(msgToSend);
 					chatTextField.setText("");
 				}
 
@@ -168,8 +169,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	}
 
 	@Override
+	
 	public void socketConnected(Socket s) throws IOException {
-
+		writer = new PrintWriter(s.getOutputStream(), true);
 	}
 
 	@Override
