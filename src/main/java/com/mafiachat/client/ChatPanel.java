@@ -4,6 +4,7 @@ import com.mafiachat.client.event.ChatConnector;
 import com.mafiachat.client.event.ChatSocketListener;
 import com.mafiachat.client.event.MessageReceiver;
 import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
 
 import java.awt.event.ActionEvent;
@@ -175,10 +176,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	}
 
 	@Override
-	public void messageArrived(ChatRequest request) {
-		Command command = request.getCommand();
-		System.out.println(request.getCommand());
-		String msg = request.getBody();
+	public void messageArrived(ChatResponse response) {
+		Command command = response.getCommand();
+		System.out.println(response.getCommand());
+		String msg = response.getBody();
 		switch(command) {
 			case NORMAL:
 			case SYSTEM:

@@ -4,6 +4,7 @@ import com.mafiachat.client.event.ChatConnector;
 import com.mafiachat.client.event.ChatSocketListener;
 import com.mafiachat.client.event.MessageReceiver;
 import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.ChatResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,15 +26,15 @@ public class ChatMessageReceiver implements Runnable, ChatSocketListener {
     }
     @Override
     public void run() {
-        ChatRequest request;
+        ChatResponse response;
         try{
             while(connector.socketAvailable()){
-                request = new ChatRequest(reader.readLine());
-                if(request == null){
+                response = new ChatResponse(reader.readLine());
+                if(response == null){
                     System.out.println("Terminating ChatMessageReceiver: message received is null");
                     break;
                 }
-                if(receiver != null) receiver.messageArrived(request);
+                if(receiver != null) receiver.messageArrived(response);
             }
         }catch (IOException e){
             System.out.println(e.getMessage());
