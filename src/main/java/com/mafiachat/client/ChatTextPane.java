@@ -4,12 +4,7 @@ import java.text.SimpleDateFormat;
 
 import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.Document;
-import javax.swing.text.Element;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.swing.text.*;
 
 public class ChatTextPane extends JTextPane{
 	private static final long serialVersionUID = 1L;
@@ -19,6 +14,8 @@ public class ChatTextPane extends JTextPane{
 	AttributeSet enterExitAttrSet;
 	private int linesToHold = 20;
 	private int maxLines = 40;
+	private boolean recordRemovedMsg = true;
+	private JProgressBar curActiveProgressBar;
 	public ChatTextPane() {
 		StyleContext sc = StyleContext.getDefaultStyleContext();
         normalAttrSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, Color.DARK_GRAY);
@@ -37,21 +34,21 @@ public class ChatTextPane extends JTextPane{
       //whisperAttrSet = sc.addAttribute(whisperAttrSet, StyleConstants.FontFamily, "Lucida Console");
         whisperAttrSet = sc.addAttribute(whisperAttrSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
 	}
+
 	public void append(String msg) {
-		AttributeSet attrset;
-		attrset = normalAttrSet;
+		AttributeSet attrset =  normalAttrSet;
 		Document doc = getDocument();
 		int count = doc.getDefaultRootElement().getElementCount();
 		try {
-			doc.insertString(doc.getLength(), msg, attrset);
+			doc.insertString(doc.getLength(), msg+"\n", attrset);
 			System.out.println("line count: " + count);
 			if(count >= maxLines) {
 				int line = count - linesToHold - 1;
 				Element map = getDocument().getDefaultRootElement();
-	            Element lineElem = map.getElement(line);
-	            int endOffset = lineElem.getEndOffset();
-	            // hide the implicit break at the end of the document
-	            endOffset = ((line == count - 1) ? (endOffset - 1) : endOffset);		
+				Element lineElem = map.getElement(line);
+				int endOffset = lineElem.getEndOffset();
+				// hide the implicit break at the end of the document
+				endOffset = ((line == count - 1) ? (endOffset - 1) : endOffset);
 				System.out.println();
 				doc.remove(0, endOffset);
 			}
