@@ -1,7 +1,18 @@
 package com.mafiachat.client;
 
+import com.mafiachat.client.event.ChatConnector;
+import com.mafiachat.client.event.ChatSocketListener;
+import com.mafiachat.client.event.MessageReceiver;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.*;
 import java.awt.*;
+import java.net.Socket;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -119,9 +130,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 					ChatRequest request = ChatRequest.createRequest(Command.NORMAL, msgToSend);
 					msgToSend=request.getFormattedMessage();
 					if(msgToSend.trim().equals("")) return;
-					if(connector.socketAvailable()) {
-						sendMessage(msgToSend);
-					}
+
 					chatTextField.setText("");
 				}
 
