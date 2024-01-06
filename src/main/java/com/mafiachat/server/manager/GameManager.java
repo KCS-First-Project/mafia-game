@@ -38,15 +38,23 @@ public class GameManager {
         return LazyHolder.INSTANCE;
     }
 
-    public void setGroupManager(GroupManager groupManager){
+    public HashMap<Role, PlayerHandler> getRole2TargetPlayer() {
+        return role2TargetPlayer;
+    }
+
+    public void clearRole2TargetPlayer() {
+        role2TargetPlayer.clear();
+    }
+
+    public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
     }
 
-    public void addPlayerHandler(PlayerHandler handler) {
+    synchronized public void addPlayerHandler(PlayerHandler handler) {
         playerGroup.add(handler);
     }
 
-    public void removePlayerHandler(PlayerHandler handler) {
+    synchronized public void removePlayerHandler(PlayerHandler handler) {
         playerGroup.remove(handler);
     }
 
@@ -89,11 +97,6 @@ public class GameManager {
         thread.join();
     }
 
-    public void setAllPlayersReady() {
-        //디버그용
-        playerGroup.forEach(PlayerHandler::setReady);
-    }
-
     synchronized public void vote(int id) {
         int voteCount = id2VoteCount.getOrDefault(id, 0);
         id2VoteCount.put(id, ++voteCount);
@@ -101,6 +104,10 @@ public class GameManager {
 
     public int getVoteCountById(int id) {
         return id2VoteCount.getOrDefault(id, 0);
+    }
+
+    public void clearVoteCount() {
+        id2VoteCount.clear();
     }
 
     public List<Integer> getMostVotedPlayerIds() {
@@ -130,7 +137,7 @@ public class GameManager {
         role2TargetPlayer.put(role, target);
     }
 
-    public void broadcastMessage(ChatRequest request){
+    public void broadcastMessage(ChatRequest request) {
         groupManager.broadcastMessage(request);
     }
 
@@ -146,7 +153,7 @@ public class GameManager {
         return gameThread;
     }
 
-    public PlayerHandler findPlayerById(int id){
+    public PlayerHandler findPlayerById(int id) {
         return (PlayerHandler) groupManager.findClientById(id);
     }
 
@@ -154,8 +161,8 @@ public class GameManager {
         assignRole();
         announceRole();
         phase = Phase.LOBBY;
-        id2VoteCount.clear();
-        role2TargetPlayer.clear();
+        clearVoteCount();
+        clearRole2TargetPlayer();
 
         logger.log(Level.INFO, "Game started");
         startDayChat();
@@ -173,7 +180,7 @@ public class GameManager {
     }
 
     private void startDayFirstVote() throws InterruptedException {
-        id2VoteCount.clear();
+        clearVoteCount();
 
         onPhase(Phase.DAY_FIRST_VOTE);
 
@@ -199,7 +206,7 @@ public class GameManager {
     }
 
     private void startDaySecondVote(List<Integer> mostVotedPlayerIds) throws InterruptedException {
-        id2VoteCount.clear();
+        clearVoteCount();
 
         onPhase(Phase.DAY_SECOND_VOTE);
 
