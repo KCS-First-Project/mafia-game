@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class ChatServerTest {
-    
+
     private ChatServer chatServer;
     @Mock
     Thread serverThread;
@@ -40,7 +40,7 @@ public class ChatServerTest {
         chatServer.shutdownHook();
     }
 
-    @DisplayName("Client 서버 연결 테스트")
+    @DisplayName("서버 실행 테스트")
     @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
     @EnumSource(value = Command.class, names = {"INIT_ALIAS", "NORMAL", "SYSTEM"})
     public void connect_client(Command command) {
