@@ -4,6 +4,7 @@ import com.mafiachat.exception.MaxPlayerException;
 import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.Command;
 import com.mafiachat.server.handler.ClientHandler;
+
 import static com.mafiachat.util.Constant.MAX_PLAYER_NUMBER;
 import static org.assertj.core.api.Assertions.*;
 
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,13 +41,13 @@ public class GroupManagerTest {
     private final String mockIp = "127.0.0.1";
 
     @BeforeEach
-    public void beforeEach(){
+    public void beforeEach() {
         groupManager = GroupManager.getInstance();
-        mockClients.forEach((c)->groupManager.addClientHandler(c));
+        mockClients.forEach((c) -> groupManager.addClientHandler(c));
     }
 
     @AfterEach
-    public void afterEach(){
+    public void afterEach() {
         groupManager = GroupManager.getInstance();
         groupManager.closeAllClientHandlers();
         mockClients.clear();
@@ -54,7 +56,7 @@ public class GroupManagerTest {
     @ParameterizedTest
     @DisplayName("클라 id 자동 생성 테스트")
     @MethodSource("getTestcaseForCreateClientId")
-    public void testCreateClientId(int expectedId){
+    public void testCreateClientId(int expectedId) {
         int id = groupManager.createClientId();
         assertThat(id).isEqualTo(expectedId);
     }
@@ -62,7 +64,7 @@ public class GroupManagerTest {
     @ParameterizedTest
     @DisplayName("id로 클라 핸들러 찾기 테스트")
     @MethodSource("getTestcaseForFindClientById")
-    public void testFindClientById(int id, ClientHandler expectedClient){
+    public void testFindClientById(int id, ClientHandler expectedClient) {
         ClientHandler client = groupManager.findClientById(id);
         assertThat(client).isEqualTo(expectedClient);
     }
@@ -70,28 +72,28 @@ public class GroupManagerTest {
     @ParameterizedTest
     @DisplayName("id로 클라 핸들러 이름 찾기 테스트")
     @MethodSource("getTestcaseForFindClientNameById")
-    public void testFindClientNameById(int id, String expectedClientName){
+    public void testFindClientNameById(int id, String expectedClientName) {
         String clientName = groupManager.findClientNameById(id);
         assertThat(clientName).isEqualTo(expectedClientName);
     }
 
     @Test
     @DisplayName("클라 핸들러 추가 테스트")
-    public void testAddClientHandler(){
+    public void testAddClientHandler() {
         ClientHandler excessClient = mock(ClientHandler.class);
 
-        Stream.generate(()->mock(ClientHandler.class))
+        Stream.generate(() -> mock(ClientHandler.class))
                 .limit(MAX_PLAYER_NUMBER)
-                .forEach((c)->groupManager.addClientHandler(c));
+                .forEach((c) -> groupManager.addClientHandler(c));
 
-        assertThatThrownBy(()->{
+        assertThatThrownBy(() -> {
             groupManager.addClientHandler(excessClient);
         }).isInstanceOf(MaxPlayerException.class);
     }
 
     @Test
     @DisplayName("클라 핸들러 제거 테스트")
-    public void testRemoveClientHandler(){
+    public void testRemoveClientHandler() {
         GroupManager spyGroupManager = spy(groupManager);
         doNothing().when(spyGroupManager).broadcastMessage(isA(ChatRequest.class));
         ClientHandler mockClient = mock();
@@ -104,10 +106,10 @@ public class GroupManagerTest {
 
     @Test
     @DisplayName("멀티캐스트 테스트")
-    public void testMulticastMessage(){
+    public void testMulticastMessage() {
         List<Integer> ids = getRandomIds(5);
         List<ClientHandler> mockClients = ids.stream()
-                .map((id)->{
+                .map((id) -> {
                     ClientHandler mockClient = mock();
                     doNothing().when(mockClient).sendMessage(isA(String.class));
                     return mockClient;
@@ -117,7 +119,7 @@ public class GroupManagerTest {
         ChatRequest request = ChatRequest.createRequest(Command.NORMAL, "hello");
         groupManager.multicastMessage(request, mockClients);
 
-        mockClients.forEach((mockClient)->{
+        mockClients.forEach((mockClient) -> {
             verify(mockClient, times(1)).sendMessage(stringArgumentCaptor.capture());
             String arg = stringArgumentCaptor.getValue();
             assertThat(arg).isEqualTo(request.getFormattedMessage());
@@ -126,7 +128,7 @@ public class GroupManagerTest {
 
     @Test
     @DisplayName("유니캐스트 테스트")
-    public void testUnicastMessage(){
+    public void testUnicastMessage() {
         ClientHandler mockClient = mock();
         doNothing().when(mockClient).sendMessage(isA(String.class));
 
@@ -141,7 +143,7 @@ public class GroupManagerTest {
     @ParameterizedTest
     @DisplayName("유저 리스트 노티 테스트")
     @MethodSource("getTestcaseForNotifyUserList")
-    public void testNotifyUserList(String expectedBody){
+    public void testNotifyUserList(String expectedBody) {
         GroupManager spyGroupManager = spy(groupManager);
         doNothing().when(spyGroupManager).broadcastMessage(isA(ChatRequest.class));
 
@@ -154,9 +156,9 @@ public class GroupManagerTest {
 
     @Test
     @DisplayName("핸들러 모두 종료 테스트")
-    public void testCloseAllClientHandlers(){
+    public void testCloseAllClientHandlers() {
         IntStream.rangeClosed(0, 5)
-                .forEach((int i)->{
+                .forEach((int i) -> {
                     ClientHandler mockClient = mock();
                     mockClients.add(mockClient);
                     groupManager.addClientHandler(mockClient);
@@ -164,7 +166,7 @@ public class GroupManagerTest {
 
         groupManager.closeAllClientHandlers();
 
-        for(ClientHandler mockClient: mockClients) {
+        for (ClientHandler mockClient : mockClients) {
             verify(mockClient, times(1)).close();
         }
     }
@@ -172,7 +174,7 @@ public class GroupManagerTest {
     @ParameterizedTest
     @DisplayName("새로운 핸들러 안내 메시지 테스트")
     @MethodSource("getTestcaseForBroadcastNewChatter")
-    public void testBroadcastNewChatter(ClientHandler newHandler, List<ClientHandler> expectedReceivers){
+    public void testBroadcastNewChatter(ClientHandler newHandler, List<ClientHandler> expectedReceivers) {
         GroupManager spyGroupManager = spy(groupManager);
         doNothing().when(spyGroupManager).multicastMessage(isA(ChatRequest.class), anyList());
         doNothing().when(spyGroupManager).notifyUserList();
@@ -185,6 +187,22 @@ public class GroupManagerTest {
                 .isEqualTo(expectedReceivers.stream().map(ClientHandler::getId).toList());
     }
 
+    @ParameterizedTest
+    @DisplayName("멀티스레드 테스트")
+    @MethodSource("getTestcaseForMultiThread")
+    public void testMultiThread(int a) {
+        List<ClientHandler> mocks = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            ClientHandler mc = mock();
+            groupManager.addClientHandler(mc);
+            mocks.add(mc);
+        }
+        groupManager.closeAllClientHandlers();
+        for (ClientHandler mc : mocks) {
+            groupManager.removeClientHandler(mc);
+        }
+    }
+
     private Stream<Arguments> getTestcaseForCreateClientId() {
         return Stream.of(
                 Arguments.of(1),
@@ -194,7 +212,7 @@ public class GroupManagerTest {
         );
     }
 
-    private List<Integer> getRandomIds(int size){
+    private List<Integer> getRandomIds(int size) {
         List<Integer> ids = new ArrayList<>(IntStream
                 .range(1, 100)
                 .boxed()
@@ -206,7 +224,7 @@ public class GroupManagerTest {
     private Stream<Arguments> getTestcaseForFindClientById() {
         List<Integer> ids = getRandomIds(6);
         return ids.stream()
-                .map((id)->{
+                .map((id) -> {
                     ClientHandler mockClient = mock();
                     when(mockClient.getId()).thenReturn(id);
                     mockClients.add(mockClient);
@@ -217,10 +235,10 @@ public class GroupManagerTest {
     private Stream<Arguments> getTestcaseForFindClientNameById() {
         List<Integer> ids = getRandomIds(6);
         return ids.stream()
-                .map((id)->{
+                .map((id) -> {
                     ClientHandler mockClient = mock();
                     when(mockClient.getId()).thenReturn(id);
-                    when(mockClient.getClientName()).thenReturn("mock"+id);
+                    when(mockClient.getClientName()).thenReturn("mock" + id);
                     mockClients.add(mockClient);
                     return Arguments.of(id, mockClient.getClientName());
                 });
@@ -229,10 +247,10 @@ public class GroupManagerTest {
     private Stream<Arguments> getTestcaseForNotifyUserList() {
         List<Integer> ids = getRandomIds(6);
         List<String> users = new ArrayList<>();
-        ids.forEach((id)->{
+        ids.forEach((id) -> {
             ClientHandler mockClient = mock(ClientHandler.class);
             when(mockClient.getId()).thenReturn(id);
-            when(mockClient.getClientName()).thenReturn("mock"+id);
+            when(mockClient.getClientName()).thenReturn("mock" + id);
             when(mockClient.getFrom()).thenReturn(mockIp);
             mockClients.add(mockClient);
             users.add("%d,mock%d,%s".formatted(id, id, mockIp));
@@ -247,11 +265,11 @@ public class GroupManagerTest {
         int newHandlerId = ids.get(0);
         ClientHandler newHandler = mock();
         when(newHandler.getId()).thenReturn(newHandlerId);
-        when(newHandler.getClientName()).thenReturn("mock"+newHandlerId);
+        when(newHandler.getClientName()).thenReturn("mock" + newHandlerId);
         mockClients.add(newHandler);
 
         List<ClientHandler> expectedReceivers = new ArrayList<>();
-        ids.forEach((id)->{
+        ids.forEach((id) -> {
             if (id != newHandlerId) {
                 ClientHandler mockClient = mock();
                 when(mockClient.getId()).thenReturn(id);
@@ -261,6 +279,17 @@ public class GroupManagerTest {
         });
         return Stream.of(
                 Arguments.of(newHandler, expectedReceivers)
+        );
+    }
+
+    public Stream<Arguments> getTestcaseForMultiThread() {
+        return Stream.of(
+                Arguments.of(1),
+                Arguments.of(2),
+                Arguments.of(3),
+                Arguments.of(4),
+                Arguments.of(5),
+                Arguments.of(6)
         );
     }
 }
