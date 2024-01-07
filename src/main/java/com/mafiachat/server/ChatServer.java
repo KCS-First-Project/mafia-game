@@ -31,7 +31,7 @@ public class ChatServer implements Runnable {
     public void shutdownHook() {
         try {
             serverSocket.close();
-            groupManager.closeAllMessageHandlers();
+            groupManager.closeAllClientHandlers();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,7 +53,7 @@ public class ChatServer implements Runnable {
 
     public void cleanup() throws IOException {
         serverSocket.close();
-        groupManager.closeAllMessageHandlers();
+        groupManager.closeAllClientHandlers();
     }
 
     public static void main(String[] args) {
