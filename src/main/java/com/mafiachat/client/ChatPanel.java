@@ -4,7 +4,9 @@ import com.mafiachat.client.event.ChatConnector;
 import com.mafiachat.client.event.ChatSocketListener;
 import com.mafiachat.client.event.MessageReceiver;
 import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
+import com.mafiachat.server.Phase;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +15,7 @@ import java.awt.event.KeyListener;
 import java.io.*;
 import java.awt.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -24,6 +27,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	JButton Ready;
 	PrintWriter writer;
 	StringBuilder msgBuilder = new StringBuilder();
+	ArrayList<ChatUser> playerList = new ArrayList<ChatUser>(); //생존 플레이어를 확인하기 위한 playerList추가
+	Phase phase = Phase.LOBBY;
+
 	public ChatPanel(ChatConnector c) {
 		super(new GridBagLayout());
 		initUI();
@@ -175,10 +181,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	}
 
 	@Override
-	public void messageArrived(ChatRequest request) {
-		Command command = request.getCommand();
-		System.out.println(request.getCommand());
-		String msg = request.getBody();
+	public void messageArrived(ChatResponse response) {
+		Command command = response.getCommand();
+		System.out.println(response.getCommand());
+		String msg = response.getBody();
 		switch(command) {
 			case NORMAL:
 			case SYSTEM:
@@ -186,19 +192,61 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 			case EXIT_ROOM:
 				System.out.println(msg);
 				chatDispArea.append(msg);
+				break;
 			case USER_LIST:
+				displayUserList(msg);
+				break;
 			case PLAYER_LIST:
+				playerList = playUserList(msg);
+				break;
 			case LOBBY:
+				phase = Phase.LOBBY;
+				break;
 			case DAY_CHAT:
+				phase = Phase.DAY_CHAT;
+				break;
 			case DAY_FIRST_VOTE:
+				phase = Phase.DAY_FIRST_VOTE;
+				break;
 			case DAY_DEFENSE:
+				phase = Phase.DAY_DEFENSE;
+				break;
 			case DAY_SECOND_VOTE:
+				phase = Phase.DAY_SECOND_VOTE;
+				break;
 			case NIGHT:
+				phase = Phase.NIGHT;
+				break;
 			case UNKNOWN:
+				System.out.println("잘못된 명령입니다.");
+				break;
 			default:
 				break;
 		}
 
+	}
+
+	private void displayUserList(String users) { //유저리스트를 추가하는 함수 추가(동시로그인시 문제있음)
+		String [] strUsers = users.split("\\|");
+		String [] nameWithIdHost;
+		ArrayList<ChatUser> list = new ArrayList<ChatUser>();
+		for(String strUser : strUsers) {
+			nameWithIdHost = strUser.split(",");
+			list.add(new ChatUser(nameWithIdHost[0], nameWithIdHost[1], nameWithIdHost[2]));
+		}
+		userList.addNewUsers(list);
+	}
+
+	private ArrayList<ChatUser> playUserList(String users){ //플레이 유저 리스트를 갱신하는 함수 추가
+		String [] PlayUsers = users.split("\\|");
+		String [] nameWithIdHostAlive;
+		ArrayList<ChatUser> list = new ArrayList<ChatUser>();
+		for(String playUser : PlayUsers) {
+			nameWithIdHostAlive = playUser.split(",");
+			list.add(new ChatUser(nameWithIdHostAlive[0], nameWithIdHostAlive[1], nameWithIdHostAlive[2],Boolean.parseBoolean(nameWithIdHostAlive[3])));
+		}
+
+		return list;
 	}
 
 	@Override

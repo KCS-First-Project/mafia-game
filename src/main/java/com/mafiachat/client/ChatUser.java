@@ -4,10 +4,19 @@ public class ChatUser {
 	String name;
 	String id;
 	String host;
-	public ChatUser(String name, String id, String host) {
-		this.name = name;
+	Boolean alive;
+	public ChatUser(String id, String name, String host) {
 		this.id = id;
+		this.name = name;
 		this.host = host;
+		this.alive = true;
+	}
+
+	public ChatUser(String id, String name, String host,Boolean alive) {
+		this.id = id;
+		this.name = name;
+		this.host = host;
+		this.alive = alive;
 	}
 	public String getName() {
 		return name;
@@ -21,4 +30,6 @@ public class ChatUser {
 	public String getHost() {
 		return host;
 	}
+
+	public Boolean getAlive() {return alive;}
 }

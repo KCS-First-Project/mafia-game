@@ -18,8 +18,27 @@ public class ChatUserList extends JList {
 		this.setCellRenderer(new CellRenderer());
 		DefaultListModel model = (DefaultListModel) getModel();
 		model.addElement(null);
-		
 
+	}
+
+	public void addNewUsers(ArrayList <ChatUser> users) { // 리스투 추가 함수 추가
+		DefaultListModel newModel = new DefaultListModel();
+		for(ChatUser user: users) {
+			newModel.addElement(user);
+		}
+		setModel(newModel);
+	}
+
+	public List<ChatUser> getUsers() {
+		DefaultListModel model = (DefaultListModel) getModel();
+		List<ChatUser> users = new ArrayList<>();
+		for (int i = 0; i < model.getSize(); i++) {
+			Object element = model.getElementAt(i);
+			if (element instanceof ChatUser) {
+				users.add((ChatUser) element);
+			}
+		}
+		return users;
 	}
 	class CellRenderer extends JLabel implements ListCellRenderer {
 		public CellRenderer() {
@@ -27,7 +46,7 @@ public class ChatUserList extends JList {
 		}
 
 		public Component getListCellRendererComponent(
-				JList list, Object value, int index, 
+				JList list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus) {
 			setText(value == null? "": value.toString());
 			if (isSelected) {
