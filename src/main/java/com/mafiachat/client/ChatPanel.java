@@ -133,7 +133,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
 					String msgToSend = chatTextField.getText();
-					ChatRequest request = ChatRequest.createRequest(Command.INIT_ALIAS, msgToSend);
+					ChatRequest request = ChatRequest.createRequest(Command.NORMAL, msgToSend);
 					msgToSend=request.getFormattedMessage();
 					if(msgToSend.trim().equals("")) return;
 					
