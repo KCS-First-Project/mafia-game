@@ -51,4 +51,9 @@ public class ChatData {
     protected String extractRequestBody(String request) {
         return request.replaceFirst("\\[\\w+\\]", "");
     }
+
+    @Override
+    public int hashCode(){
+        return getFormattedMessage().hashCode();
+    }
 }
