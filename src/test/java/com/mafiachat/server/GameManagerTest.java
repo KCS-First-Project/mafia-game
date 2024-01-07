@@ -4,16 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.server.handler.ClientHandler;
 import com.mafiachat.server.handler.Player.Player;
 import com.mafiachat.server.handler.PlayerHandler;
 import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -127,7 +135,7 @@ public class GameManagerTest {
 
     }
 
-    // IndexOutOfBoundsException + 독립 테스트시 성공, 전체 테스트시 실패...
+    // TODO IndexOutOfBoundsException + 독립 테스트시 성공, 전체 테스트시 실패...
     @DisplayName("모든 유저가 Ready를 한 경우 게임은 시작된다.")
     @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
     @ValueSource(ints = {5, 6, 7, 8})
@@ -164,11 +172,10 @@ public class GameManagerTest {
         assertThat(gameManager.getVoteCountById(id)).isEqualTo(voteCnt);
     }
 
-    // 테스트 실패...
     @DisplayName("가장 많은 투표를 받은 플레이어 아이디 반환")
     @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
     @CsvSource({"1,10,2,15", "3,20,4,25", "5,30,6,35"})
-    public void getMostVotedPlayerIds(int id1, int voteCount1, int id2, int voteCount2) throws IOException {
+    public void getMostVotedPlayerIds(int id1, int voteCount1, int id2, int voteCount2) {
         //given
         List<PlayerHandler> playerHandlers = Stream.generate(() -> {
             PlayerHandler playerHandler = mock();
@@ -251,5 +258,44 @@ public class GameManagerTest {
 
         //then
         assertEquals(targetPlayer, gameManager.getRole2TargetPlayer().get(role));
+
+
+    }
+
+    @DisplayName("직업이 시민인 플레이어는 밤에 아무런 안내 메시지를 받지 못한다.")
+    @Test
+    public void verifyNoBroadcastForCitizenRole() {
+        //given
+        Role role = Role.CITIZEN;
+        ChatRequest request = new ChatRequest("Test Message");
+        GroupManager mockGroupManager = mock(GroupManager.class);
+
+        //when
+        gameManager.broadcastNormalRoleMessage(role, request);
+
+        // Then
+        verify(mockGroupManager, never()).multicastMessage(any(ChatRequest.class), anyList());
+    }
+
+    //TODO 실패 테스트
+    @DisplayName("직업이 시민이 아닌 플레이어는 밤에 안내 메시지를 받는다.")
+    @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
+    @EnumSource(value = Role.class, names = {"MAFIA", "DOCTOR", "POLICE"})
+    public void testBroadcastNormalRoleMessage_NotCitizen(Role role) throws IOException {
+        //given
+        ChatRequest request = new ChatRequest("[NIGHT]Test Message");
+        GroupManager mockGroupManager = mock(GroupManager.class);
+
+        ClientHandler clientHandler1 = new PlayerHandler(groupManager, gameManager, clientSocket, player);
+        ClientHandler clientHandler2 = new PlayerHandler(groupManager, gameManager, clientSocket, player);
+        List<ClientHandler> receivers = Arrays.asList(clientHandler1, clientHandler2);
+
+//        when(mockGroupManager.findPlayersByRole(any(Role.class))).thenReturn(receivers);
+
+        //when
+        gameManager.broadcastNormalRoleMessage(role, request);
+
+        //then
+        verify(mockGroupManager, times(1)).multicastMessage(request, receivers);
     }
 }
