@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 
 
 public class MafiaClient implements ChatConnector {
+
 	public static void main(String[] args) {
 		new MafiaClient();
 	}
