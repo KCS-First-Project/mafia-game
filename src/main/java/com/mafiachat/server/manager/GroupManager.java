@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class GroupManager {
     ;
-    private final String ENTER_ROOM = " has just left chat room";
+    private final String ENTER_ROOM = " has just entered chat room";
     private final String EXIT_ROOM = " has just left chat room";
     private int nextClientId = 1;
     private final List<ClientHandler> clientGroup = Collections.synchronizedList(new ArrayList<>());
