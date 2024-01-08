@@ -99,7 +99,7 @@ public class GroupManager {
         broadcastMessage(request);
     }
 
-    public void closeAllMessageHandlers() {
+    public void closeAllClientHandlers() {
         for (ClientHandler handler : clientGroup) {
             handler.close();
         }
