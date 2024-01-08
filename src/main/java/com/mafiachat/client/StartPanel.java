@@ -6,6 +6,7 @@ import java.awt.Font;
 import javax.swing.*;
 
 public class StartPanel extends JPanel {
+	private static final String GAME_NAME = "MIDS(Mafia Invasion Detection System)";
 
 	private JLabel mafiaImage;
 	private JLabel midsLabel;
@@ -33,7 +34,7 @@ public class StartPanel extends JPanel {
 
         play.setBackground(Color.BLUE);
         play.setForeground(Color.WHITE);
-		JLabel midsLabel=new JLabel(MafiaClient.GAME_NAME);
+		JLabel midsLabel=new JLabel(GAME_NAME);
 		midsLabel.setBounds(130,200,300,30);
 		midsLabel.setForeground(Color.WHITE);
         quit.setBackground(Color.RED);
