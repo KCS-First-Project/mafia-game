@@ -3,45 +3,64 @@ package com.mafiachat.client;
 import javax.swing.*;
 
 public class GameTimer implements Runnable {
-    private int seconds;
-    private boolean running;
+    private int totalSeconds;
     private JLabel timerLabel;
+    private Thread timerThread;
 
-    public GameTimer(int seconds, JLabel timerLabel) {
-        this.seconds = seconds;
-        this.timerLabel = timerLabel;
-        this.running = false;
+    private GameTimer() {
+
     }
 
-    public void startTimer() {
-        running = true;
-        Thread thread = new Thread(this);
-        thread.start();
+    public static GameTimer getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
+    public void startTimer(int seconds) {
+        this.totalSeconds = seconds;
+        stopTimer();
+        timerThread = new Thread(this);
+        timerThread.start();
     }
 
     public void stopTimer() {
-        running = false;
+        if (timerThread == null) {
+            return;
+        }
+        timerThread.interrupt();
+    }
+
+    public void setCountDownListener(JLabel timerLabel) {
+        this.timerLabel = timerLabel;
     }
 
     @Override
     public void run() {
-        while (running) {
-            int mins = seconds / 60;
-            int secs = seconds % 60;
-
-            String timeString = String.format("%02d:%02d", mins, secs);
-            timerLabel.setText(timeString);
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        try {
+            while (totalSeconds > 0) {
+                countDown();
             }
-
-            seconds--;
-            if (seconds < 0) {
-                stopTimer();
-            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            timerThread = null;
         }
+    }
+
+    private void countDown() throws InterruptedException {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+
+        if (timerLabel != null) {
+            String timeString = String.format("%02d:%02d", minutes, seconds);
+            timerLabel.setText(timeString);
+        }
+
+        Thread.sleep(1000);
+
+        totalSeconds--;
+    }
+
+    private static class LazyHolder {
+        private static final GameTimer INSTANCE = new GameTimer();
     }
 }
