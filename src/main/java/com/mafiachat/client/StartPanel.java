@@ -12,6 +12,8 @@ public class StartPanel extends JPanel {
 	public JButton play;
 	private JButton quit;
 
+
+
 	StartPanel(){
 
 		mafiaImage=new JLabel();
@@ -21,21 +23,21 @@ public class StartPanel extends JPanel {
         play.setFont(buttonFont);
         quit.setFont(buttonFont);
 
-		play.setOpaque(true); // 추가
-		play.setContentAreaFilled(true); // 추가
-		play.setBorderPainted(false); // 추가
+		play.setOpaque(true);
+		play.setContentAreaFilled(true);
+		play.setBorderPainted(false);
 
-		quit.setOpaque(true); // 추가
-		quit.setContentAreaFilled(true); // 추가
-		quit.setBorderPainted(false); // 추가
+		quit.setOpaque(true);
+		quit.setContentAreaFilled(true);
+		quit.setBorderPainted(false);
 
-        play.setBackground(new Color(0, 128, 255)); // 파란색
-        play.setForeground(Color.WHITE); // 흰색
-		midsLabel=new JLabel("MIDS(Mafia Invasion Dectection System)");
+        play.setBackground(Color.BLUE);
+        play.setForeground(Color.WHITE);
+		JLabel midsLabel=new JLabel(MafiaClient.GAME_NAME);
 		midsLabel.setBounds(130,200,300,30);
-		midsLabel.setForeground(Color.white);
-        quit.setBackground(new Color(255, 0, 0)); // 빨간색
-        quit.setForeground(Color.WHITE); // 흰색
+		midsLabel.setForeground(Color.WHITE);
+        quit.setBackground(Color.RED);
+        quit.setForeground(Color.WHITE);
 		mafiaImage.setBounds(150, 50, 200, 170);
 		play.setBounds(200, 250, 100, 30);
 		quit.setBounds(200, 300, 100, 30);
@@ -50,6 +52,7 @@ public class StartPanel extends JPanel {
 		quit.addActionListener(e -> {
 			JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
 			frame.dispose();
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		});
 
 	}

@@ -8,6 +8,7 @@ import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
 import com.mafiachat.server.Phase;
+import com.mafiachat.client.GameTimer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,6 +32,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	StringBuilder msgBuilder = new StringBuilder();
 	ArrayList<ChatUser> playerList = new ArrayList<ChatUser>(); //생존 플레이어를 확인하기 위한 playerList추가
 	Phase phase = Phase.LOBBY;
+
+	private JLabel timerLabel;
+	private GameTimer gameTimer;
 
 	public ChatPanel(ChatConnector c) {
 		super(new GridBagLayout());
@@ -58,11 +62,24 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 		ImageIcon scaledMafiaIcon = new ImageIcon(mafiaImage);
 		JLabel mafiaLabel = new JLabel(scaledMafiaIcon, JLabel.CENTER);
 		JPanel timerPanel = new JPanel();
+		timerPanel.setOpaque(false); // 투명하게 설정
 		JLabel timerLabel = new JLabel("00:00", JLabel.CENTER);
-		//panel등 색깔설정
-		setBackground(Color.black);
+
+		timerLabel.setForeground(Color.WHITE);
+		setBackground(Color.BLACK);
 		timerPanel.add(timerLabel);
-		
+
+		c.gridy = 0;
+		c.gridx = 1;
+		c.gridwidth = 2;
+		c.insets = new Insets(2, 2, 2, 2);
+		add(timerLabel, c);
+
+		// GameTimer 객체 생성 및 초기화
+		gameTimer = new GameTimer(180, timerLabel); // 3분(180초) 타이머로 설정
+		// 타이머 시작 -> 현재 play시작하면 바로 시작되도록 구현됨(커스터마이징 필요)
+		gameTimer.startTimer();
+
 		mafiaLabel.setPreferredSize(new Dimension(50, 50)); // 선호 크기 설정
 		c.gridy = 0;
 		c.gridx = 0;
@@ -164,10 +181,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 		c.gridx = 2;
 		c.anchor = GridBagConstraints.CENTER;
 		Ready.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-	    Ready.setBackground(Color.BLUE);
-	    Ready.setForeground(Color.WHITE);
+		Ready.setBackground(Color.BLUE);
+		Ready.setForeground(Color.WHITE);
 //	    Ready.setFocusPainted(false); // 포커스 테두리 제거
-	    Ready.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
+		Ready.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
 		Ready.setBorder(new RoundBorder(10));
 		vote.setFont(new Font("맑은 고딕", Font.BOLD, 14));
 		vote.setBackground(Color.blue);
@@ -175,9 +192,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 		vote.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
 		vote.setFocusPainted(false); // 포커스 테두리 제거
 		vote.setBorder(new RoundBorder(20));
-		
+
 		add(vote,c);
-		
+
 		
 		add(Ready, c);
 	}
@@ -188,7 +205,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	}
 
 	@Override
-	
+
 	public void socketConnected(Socket s) throws IOException {
 		writer = new PrintWriter(s.getOutputStream(), true);
 	}
@@ -274,35 +291,35 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 			msgToSend=readyRequest.getFormattedMessage();
 			System.out.println(msgToSend);
 			writer.println(msgToSend);
-			
-			
+
+
 			String chatName = JOptionPane.showInputDialog(null, "Enter chat name:");
 	        ChatRequest request = ChatRequest.createRequest(Command.INIT_ALIAS, chatName);
 	        chatName=request.getFormattedMessage();
 	        writer.println(chatName);
-			
+
 			System.out.println("sadasd");
 			Ready.setVisible(false);
 			vote.setVisible(true);
 		}
 		else if(e.getSource()==vote) {
-			
+
 			if(phase==Phase.DAY_SECOND_VOTE) {
-				
+
 			}
 			//처음 투표시 생존인원 투표
 			if(phase==Phase.DAY_FIRST_VOTE) {
 				int playerNum=playerList.size();
 				String[] votePlayer = new String[8];
-				for(int i=0; i<playerNum; i++) 
+				for(int i=0; i<playerNum; i++)
 			{
 					votePlayer[i]=playerList.get(i).getName();
 			}
 			//테스트 값들
 //				String[] votePlayer = {"태우", "지훈", "혜인", "주현"};
 				int killedPlayer = JOptionPane.showOptionDialog(null,"누구에게 투표하시겠습니까?", "플레이어 선택", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
-				
-				
+
+
 				System.out.println(killedPlayer);
 				//실제 아이디 보내주기
 				ChatRequest request = ChatRequest.createRequest(Command.VOTE, playerList.get(killedPlayer).getId());
@@ -310,26 +327,23 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 		        String killP=request.getFormattedMessage();
 		        writer.println(killP);
 		        System.out.println(killP);
-				
+
 			}
-		
 
 
-		
-	    
+
+	private static class RoundBorder implements Border {
+		private int radius;
+
+		public RoundBorder(int radius) {
+			this.radius = radius;
 		}
-	}class RoundBorder implements Border {
-        private int radius;
 
-        public RoundBorder(int radius) {
-            this.radius = radius;
-        }
-
-        @Override
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        	g.setColor(new Color(217,217,217));
-            g.drawRoundRect(x, y, width, height, radius, radius);
-        }
+		@Override
+		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+			g.setColor(new Color(217,217,217));
+			g.drawRoundRect(x, y, width, height, radius, radius);
+		}
 
 		@Override
 		public Insets getBorderInsets(Component c) {
@@ -341,5 +355,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 			// TODO Auto-generated method stub
 			return true;
 		}
+	}
+
     }
 }
