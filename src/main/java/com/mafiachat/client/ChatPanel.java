@@ -1,5 +1,6 @@
 package com.mafiachat.client;
 
+import com.mafiachat.client.ChatPanel.RoundBorder;
 import com.mafiachat.client.event.ChatConnector;
 import com.mafiachat.client.event.ChatSocketListener;
 import com.mafiachat.client.event.MessageReceiver;
@@ -26,6 +27,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	ChatUserList userList;
 	JButton Ready;
 	PrintWriter writer;
+	JButton vote;
 	StringBuilder msgBuilder = new StringBuilder();
 	ArrayList<ChatUser> playerList = new ArrayList<ChatUser>(); //생존 플레이어를 확인하기 위한 playerList추가
 	Phase phase = Phase.LOBBY;
@@ -36,6 +38,8 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 	}
 	
 	private void initUI() {
+		vote = new JButton("vote");
+		vote.setVisible(false);
 		chatTextField = new JTextField();
 		chatDispArea = new ChatTextPane();//new ChatTextArea();
 		userList = new ChatUserList();
@@ -113,6 +117,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 		
 
 		Ready.addActionListener(this);
+		vote.addActionListener(this);
 		chatTextField.addKeyListener(new KeyListener() {
 
 			@Override
@@ -164,6 +169,14 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 //	    Ready.setFocusPainted(false); // 포커스 테두리 제거
 	    Ready.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
 		Ready.setBorder(new RoundBorder(10));
+		vote.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+		vote.setBackground(Color.blue);
+		vote.setForeground(Color.WHITE);
+		vote.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
+		vote.setFocusPainted(false); // 포커스 테두리 제거
+		vote.setBorder(new RoundBorder(20));
+		
+		add(vote,c);
 		
 		
 		add(Ready, c);
@@ -243,7 +256,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 		ArrayList<ChatUser> list = new ArrayList<ChatUser>();
 		for(String playUser : PlayUsers) {
 			nameWithIdHostAlive = playUser.split(",");
-			list.add(new ChatUser(nameWithIdHostAlive[0], nameWithIdHostAlive[1], nameWithIdHostAlive[2],Boolean.parseBoolean(nameWithIdHostAlive[3])));
+			if(Boolean.parseBoolean(nameWithIdHostAlive[3])) {
+				list.add(new ChatUser(nameWithIdHostAlive[0], nameWithIdHostAlive[1], nameWithIdHostAlive[2],Boolean.parseBoolean(nameWithIdHostAlive[3])));
+			}
 		}
 
 		return list;
@@ -251,11 +266,59 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		//레디버튼누르면 레디보냄
+		if(e.getSource()==Ready)
+		{
+			String msgToSend;
+			ChatRequest readyRequest = ChatRequest.createRequest(Command.READY, "");
+			msgToSend=readyRequest.getFormattedMessage();
+			System.out.println(msgToSend);
+			writer.println(msgToSend);
+			
+			
+			String chatName = JOptionPane.showInputDialog(null, "Enter chat name:");
+	        ChatRequest request = ChatRequest.createRequest(Command.INIT_ALIAS, chatName);
+	        chatName=request.getFormattedMessage();
+	        writer.println(chatName);
+			
+			System.out.println("sadasd");
+			Ready.setVisible(false);
+			vote.setVisible(true);
+		}
+		else if(e.getSource()==vote) {
+			
+			if(phase==Phase.DAY_SECOND_VOTE) {
+				
+			}
+			//처음 투표시 생존인원 투표
+			if(phase==Phase.DAY_FIRST_VOTE) {
+				int playerNum=playerList.size();
+				String[] votePlayer = new String[8];
+				for(int i=0; i<playerNum; i++) 
+			{
+					votePlayer[i]=playerList.get(i).getName();
+			}
+			//테스트 값들
+//				String[] votePlayer = {"태우", "지훈", "혜인", "주현"};
+				int killedPlayer = JOptionPane.showOptionDialog(null,"누구에게 투표하시겠습니까?", "플레이어 선택", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
+				
+				
+				System.out.println(killedPlayer);
+				//실제 아이디 보내주기
+				ChatRequest request = ChatRequest.createRequest(Command.VOTE, playerList.get(killedPlayer).getId());
+//				ChatRequest request = ChatRequest.createRequest(Command.VOTE, "1");
+		        String killP=request.getFormattedMessage();
+		        writer.println(killP);
+		        System.out.println(killP);
+				
+			}
+		
 
-	}
 
-
-	private static class RoundBorder implements Border {
+		
+	    
+		}
+	}class RoundBorder implements Border {
         private int radius;
 
         public RoundBorder(int radius) {
@@ -279,5 +342,4 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 			return true;
 		}
     }
-    
 }
