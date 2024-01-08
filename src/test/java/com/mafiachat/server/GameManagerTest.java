@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -21,25 +22,30 @@ import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class GameManagerTest {
 
     @Mock
@@ -53,12 +59,16 @@ public class GameManagerTest {
     @Mock
     private GroupManager groupManager;
 
-    @Mock
-    private PlayerHandler playerHandler;
-
     private GameManager gameManager;
 
     private Player player;
+    private final List<ClientHandler> mockClients = new ArrayList<>();
+
+    @Captor
+    ArgumentCaptor<ChatRequest> requestArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<List<ClientHandler>> clientHandlerArgumentCaptor;
 
     private Logger logger = Logger.getLogger(GameManagerTest.class.getSimpleName());
 
@@ -66,7 +76,7 @@ public class GameManagerTest {
     @BeforeEach
     void setUp() {
         gameManager = GameManager.getInstance();
-        groupManager = GroupManager.getInstance();
+        mockClients.forEach((c) -> groupManager.addClientHandler(c));
         player = spy(new Player(gameManager));
     }
 
@@ -81,6 +91,7 @@ public class GameManagerTest {
     public void afterWork() {
         gameManager.getRole2TargetPlayer().clear();
         gameManager.clearVoteCount();
+        mockClients.clear();
         chatServer.shutdownHook();
     }
 
@@ -88,21 +99,25 @@ public class GameManagerTest {
     @DisplayName("플레이어가 5인 미만일 때 게임은 시작되지 않는다.")
     @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
     @ValueSource(ints = {1, 2, 3, 4})
-    public void shouldNotStartGameWhenPlayerCountIsLessThanFive(int playerCnt) throws IOException {
+    public void shouldNotStartGameWhenPlayerCountIsLessThanFive(int playerCnt) {
         //given
-        playerHandler = new PlayerHandler(groupManager, gameManager, clientSocket, player);
-        for (int i = 0; i < playerCnt; i++) {
-            gameManager.addPlayerHandler(playerHandler);
-        }
+        List<Integer> ids = getRandomIds(playerCnt);
+        List<PlayerHandler> playerHandlers = ids.stream()
+                .map((id) -> {
+                    PlayerHandler mockPlayerHandler = mock();
+                    gameManager.addPlayerHandler(mockPlayerHandler);
+                    return mockPlayerHandler;
+                })
+                .toList();
 
         //when
         boolean result = gameManager.tryStartGame();
 
         //then
-        assertEquals(false, result, "5인 미만일 때 게임이 시작되지 않아야 합니다.");
-
-        gameManager.removePlayerHandler(playerHandler);
-
+        assertEquals(false, result);
+        for (PlayerHandler handler : playerHandlers) {
+            gameManager.removePlayerHandler(handler);
+        }
     }
 
     @DisplayName("모든 유저가 Ready를 하지 않는 경우 게임은 시작되지 않는다.")
@@ -110,50 +125,48 @@ public class GameManagerTest {
     @ValueSource(ints = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17})
     public void shouldNotStartGameWhenPlayerNotAllReady(int playerCnt) throws IOException {
         //given
-        playerHandler = new PlayerHandler(groupManager, gameManager, clientSocket, player);
-        for (int i = 0; i < playerCnt; i++) {
-            gameManager.addPlayerHandler(playerHandler);
-        }
-
-        // 에러 고쳐지면 Given 코드 교체할 것
-//        List<PlayerHandler> playerHandlers = Stream.generate(() -> {
-//            PlayerHandler playerHandler = mock();
-//            when(playerHandler.getId()).thenReturn(groupManager.createClientId());
-//            gameManager.addPlayerHandler(playerHandler);
-//            return playerHandler;
-//        }).limit(playerCnt).collect(Collectors.toList());
-
-        gameManager.addPlayerHandler(playerHandler);
+        List<Integer> ids = getRandomIds(playerCnt);
+        List<PlayerHandler> playerHandlers = ids.stream()
+                .map((id) -> {
+                    PlayerHandler mockPlayerHandler = mock();
+                    gameManager.addPlayerHandler(mockPlayerHandler);
+                    return mockPlayerHandler;
+                })
+                .toList();
 
         //when
         boolean result = gameManager.tryStartGame();
 
         //then
         assertEquals(false, result, "아직 준비되지 않은 플레이어가 있습니다.");
-
-        gameManager.removePlayerHandler(playerHandler);
-
+        for (PlayerHandler handler : playerHandlers) {
+            gameManager.removePlayerHandler(handler);
+        }
     }
 
-    // TODO IndexOutOfBoundsException + 독립 테스트시 성공, 전체 테스트시 실패...
     @DisplayName("모든 유저가 Ready를 한 경우 게임은 시작된다.")
     @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
     @ValueSource(ints = {5, 6, 7, 8})
     public void shouldStartGameWhenAllPlayersAreReady(int playerCnt) throws IOException {
         //given
-        playerHandler = new PlayerHandler(groupManager, gameManager, clientSocket, player);
-        for (int i = 0; i < playerCnt; i++) {
-            player.setReady();
-            gameManager.addPlayerHandler(playerHandler);
-        }
+        List<Integer> ids = getRandomIds(playerCnt);
+        List<PlayerHandler> playerHandlers = ids.stream()
+                .map((id) -> {
+                    PlayerHandler mockPlayerHandler = mock();
+                    when(mockPlayerHandler.isReady()).thenReturn(true);
+                    gameManager.addPlayerHandler(mockPlayerHandler);
+                    return mockPlayerHandler;
+                })
+                .toList();
 
         //when
         boolean result = gameManager.tryStartGame();
 
         //then
-        assertEquals(true, result, "게임을 시작합니다.");
-
-        gameManager.removePlayerHandler(playerHandler);
+        assertEquals(true, result);
+        for (PlayerHandler handler : playerHandlers) {
+            gameManager.removePlayerHandler(handler);
+        }
     }
 
     @DisplayName("아이디별 투표 집계가 올바르게 이루어지는지 테스트")
@@ -177,12 +190,13 @@ public class GameManagerTest {
     @CsvSource({"1,10,2,15", "3,20,4,25", "5,30,6,35"})
     public void getMostVotedPlayerIds(int id1, int voteCount1, int id2, int voteCount2) {
         //given
-        List<PlayerHandler> playerHandlers = Stream.generate(() -> {
-            PlayerHandler playerHandler = mock();
-            when(playerHandler.getId()).thenReturn(groupManager.createClientId());
-            gameManager.addPlayerHandler(playerHandler);
-            return playerHandler;
-        }).limit(5).collect(Collectors.toList());
+        PlayerHandler mockPlayerHandler1 = mock();
+        when(mockPlayerHandler1.getId()).thenReturn(id1);
+        gameManager.addPlayerHandler(mockPlayerHandler1);
+
+        PlayerHandler mockPlayerHandler2 = mock();
+        when(mockPlayerHandler2.getId()).thenReturn(id2);
+        gameManager.addPlayerHandler(mockPlayerHandler2);
 
         //when
         for (int i = 0; i < voteCount1; i++) {
@@ -196,6 +210,8 @@ public class GameManagerTest {
 
         //then
         assertThat(mostVotedPlayerIds).containsOnly(id2);
+        gameManager.removePlayerHandler(mockPlayerHandler1);
+        gameManager.removePlayerHandler(mockPlayerHandler2);
     }
 
     @DisplayName("시민이 아닌 직업을 가진 플레이어 타깃팅는 다른 플레이어를 타깃팅 할 수 있다.")
@@ -258,8 +274,6 @@ public class GameManagerTest {
 
         //then
         assertEquals(targetPlayer, gameManager.getRole2TargetPlayer().get(role));
-
-
     }
 
     @DisplayName("직업이 시민인 플레이어는 밤에 아무런 안내 메시지를 받지 못한다.")
@@ -277,25 +291,46 @@ public class GameManagerTest {
         verify(mockGroupManager, never()).multicastMessage(any(ChatRequest.class), anyList());
     }
 
-    //TODO 실패 테스트
     @DisplayName("직업이 시민이 아닌 플레이어는 밤에 안내 메시지를 받는다.")
     @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
     @EnumSource(value = Role.class, names = {"MAFIA", "DOCTOR", "POLICE"})
-    public void testBroadcastNormalRoleMessage_NotCitizen(Role role) throws IOException {
+    public void testBroadcastNormalRoleMessage_NotCitizen(Role role) {
         //given
         ChatRequest request = new ChatRequest("[NIGHT]Test Message");
-        GroupManager mockGroupManager = mock(GroupManager.class);
+        GroupManager spyGroupManager = spy();
+        doNothing().when(spyGroupManager).multicastMessage(any(), any());
+        GroupManager tmpGroupManager = groupManager;
+        gameManager.setGroupManager(spyGroupManager);
 
-        ClientHandler clientHandler1 = new PlayerHandler(groupManager, gameManager, clientSocket, player);
-        ClientHandler clientHandler2 = new PlayerHandler(groupManager, gameManager, clientSocket, player);
-        List<ClientHandler> receivers = Arrays.asList(clientHandler1, clientHandler2);
+        PlayerHandler mockPlayerHandler1 = mock();
+        when(mockPlayerHandler1.getRole()).thenReturn(role);
+        gameManager.addPlayerHandler(mockPlayerHandler1);
+        PlayerHandler mockPlayerHandler2 = mock();
+        when(mockPlayerHandler2.getRole()).thenReturn(role);
+        gameManager.addPlayerHandler(mockPlayerHandler2);
 
-//        when(mockGroupManager.findPlayersByRole(any(Role.class))).thenReturn(receivers);
+        List<ClientHandler> receivers = Arrays.asList(mockPlayerHandler1, mockPlayerHandler2);
 
         //when
         gameManager.broadcastNormalRoleMessage(role, request);
 
         //then
-        verify(mockGroupManager, times(1)).multicastMessage(request, receivers);
+        verify(spyGroupManager, times(1)).multicastMessage(requestArgumentCaptor.capture(),
+                clientHandlerArgumentCaptor.capture());
+        assertEquals(request, requestArgumentCaptor.getValue());
+        assertEquals(receivers, clientHandlerArgumentCaptor.getValue());
+
+        gameManager.removePlayerHandler(mockPlayerHandler1);
+        gameManager.removePlayerHandler(mockPlayerHandler2);
+        gameManager.setGroupManager(tmpGroupManager);
+    }
+
+    private List<Integer> getRandomIds(int size) {
+        List<Integer> ids = new ArrayList<>(IntStream
+                .range(1, 100)
+                .boxed()
+                .toList());
+        Collections.shuffle(ids);
+        return ids.subList(0, size);
     }
 }
