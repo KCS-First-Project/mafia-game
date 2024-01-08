@@ -165,10 +165,12 @@ public class GameManager {
         clearRole2TargetPlayer();
 
         logger.log(Level.INFO, "Game started");
+        notifyPlayerList();
         startDayChat();
     }
 
     private void startDayChat() throws InterruptedException {
+        notifyPlayerList();
         GameResult gameResult = getGameResult();
         if (gameResult != GameResult.RESUME) {
             endGame(gameResult);
@@ -181,6 +183,7 @@ public class GameManager {
 
     private void startDayFirstVote() throws InterruptedException {
         clearVoteCount();
+        notifyPlayerList();
 
         onPhase(Phase.DAY_FIRST_VOTE);
 
@@ -194,6 +197,7 @@ public class GameManager {
     }
 
     private void startDayDefense(List<Integer> mostVotedPlayerIds) throws InterruptedException {
+        notifyPlayerList();
         String announceMessage = mostVotedPlayerIds.stream()
                 .map((id) -> "%s(%d)".formatted(groupManager.findClientNameById(id), id))
                 .collect(Collectors.joining(", "));
@@ -207,6 +211,7 @@ public class GameManager {
 
     private void startDaySecondVote(List<Integer> mostVotedPlayerIds) throws InterruptedException {
         clearVoteCount();
+        notifyPlayerList();
 
         onPhase(Phase.DAY_SECOND_VOTE);
 
@@ -226,6 +231,8 @@ public class GameManager {
     }
 
     private void startNight() throws InterruptedException {
+        notifyPlayerList();
+
         onPhase(Phase.NIGHT);
 
         PlayerHandler killedByMafia = applyRoleAction();
@@ -234,6 +241,7 @@ public class GameManager {
     }
 
     private void endGame(GameResult gameResult) {
+        notifyPlayerList();
         announceResult(gameResult);
         dismissRole();
         goToLobby();
