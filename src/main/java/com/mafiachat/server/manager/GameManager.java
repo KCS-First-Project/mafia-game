@@ -257,6 +257,8 @@ public class GameManager {
 
     private void goToLobby() {
         phase = Phase.LOBBY;
+        ChatRequest phaseNotifyRequest = ChatRequest.createRequest(Command.valueOf(phase.name()), "");
+        groupManager.broadcastMessage(phaseNotifyRequest);
     }
 
     private boolean checkAllReady() {
@@ -269,8 +271,8 @@ public class GameManager {
     private void onPhase(Phase phase) throws InterruptedException {
         proceedPhase();
 
-        ChatRequest phaseNotiRequest = ChatRequest.createRequest(Command.valueOf(phase.name()), "");
-        groupManager.broadcastMessage(phaseNotiRequest);
+        ChatRequest phaseNotifyRequest = ChatRequest.createRequest(Command.valueOf(phase.name()), "");
+        groupManager.broadcastMessage(phaseNotifyRequest);
         ChatRequest phaseAnnounceRequest = ChatRequest.createSystemRequest(phase.announceMessage);
         groupManager.broadcastMessage(phaseAnnounceRequest);
 
