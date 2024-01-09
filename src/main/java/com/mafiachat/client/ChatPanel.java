@@ -7,6 +7,7 @@ import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
 import com.mafiachat.server.Phase;
+import com.mafiachat.server.Role;
 import com.mafiachat.util.Constant;
 
 import java.awt.event.ActionEvent;
@@ -33,8 +34,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
     StringBuilder msgBuilder = new StringBuilder();
     ArrayList<ChatUser> playerList = new ArrayList<ChatUser>(); //생존 플레이어를 확인하기 위한 playerList추가
 
-    Map<String,Integer> fistVotedList = new HashMap<>(); //투표된 사람 함수 추가
+    Map<String,String> fistVotedList = new HashMap<>(); //투표된 사람 함수 추가
     Phase phase = Phase.LOBBY;
+
+    Role job;
 
     String playerName = "anonymous";
 
@@ -212,9 +215,6 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         String msg = response.getBody();
         switch (command) {
             case SYSTEM:
-                if(phase == Phase.DAY_FIRST_VOTE){
-                    fistVotedList = votedUserList(msg);
-                }
             case NORMAL:
             case ENTER_ROOM:
             case EXIT_ROOM:
@@ -226,6 +226,12 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 break;
             case PLAYER_LIST:
                 playerList = playUserList(msg);
+                break;
+            case NOTIFY_ROLE :
+                job = Role.valueOf(msg);
+                break;
+            case VOTED_LIST:
+                getFirstVotedList(msg);
                 break;
             case LOBBY:
                 phase = Phase.LOBBY;
@@ -240,6 +246,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 setTimer();
                 break;
             case DAY_DEFENSE:
+                setVoteDisable();
                 phase = Phase.DAY_DEFENSE;
                 setTimer();
                 break;
@@ -249,7 +256,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 setTimer();
                 break;
             case NIGHT:
-                setVoteEnabled();
+                setVoteDisable();
+                if(job != Role.CITIZEN){
+                    setVoteEnabled();
+                }
                 phase = Phase.NIGHT;
                 setTimer();
                 break;
@@ -276,22 +286,20 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         userList.addNewUsers(list);
     }
 
-    private Map<String,Integer> votedUserList(String users){
-        users = users.replaceFirst("\\[.*?\\]", "").trim();
-        if(users.startsWith("첫")||users.startsWith("투")){
-            return new HashMap<>();
+    private void getFirstVotedList(String users){
+        fistVotedList.clear();
+        String[] userIdList = users.split(",");
+        for (String userId : userIdList) {
+            for (ChatUser player : playerList) {
+                if(userId.equals(player.getId())){
+                    fistVotedList.put(player.getName(),player.getId());
+                    break;
+                }
+            }
         }
-        String[] userList = users.split(", ");
 
-        for (String user : userList) {
-            String[] parts = user.split("\\(");
-            String nickname = parts[0];
-            int id = Integer.parseInt(parts[1].substring(0, parts[1].length() - 1));
-
-            fistVotedList.put(nickname, id);
-        }
-        return fistVotedList;
     }
+
 
     private ArrayList<ChatUser> playUserList(String users) { //플레이 유저 리스트를 갱신하는 함수 추가
         String[] PlayUsers = users.split("\\|");
@@ -371,8 +379,15 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                     votePlayer[i] = playerList.get(i).getName();
                 }
 
-                int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "직업행동", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
 
+                int killedPlayer=0;
+                if(job.equals(Role.MAFIA)) {
+                    killedPlayer = showJobActionDialog(votePlayer, "누구를 죽이시겠습니까?");
+                }else if(job.equals(Role.DOCTOR)){
+                    killedPlayer = showJobActionDialog(votePlayer, "누구를 살리겠습니까?");
+                }else if(job.equals(Role.POLICE)){
+                    killedPlayer = showJobActionDialog(votePlayer, "누구의 직업을 확인하시겠습니까?");
+                }
 
                 System.out.println(killedPlayer);
                 //실제 아이디 보내주기
@@ -383,6 +398,21 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 setVoteDisable();
             }
         }
+    }
+
+    private int showJobActionDialog(String[] votePlayer, String message) {
+        int killedPlayer;
+        killedPlayer = JOptionPane.showOptionDialog(
+                null,
+                message,
+                job.description,
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                votePlayer,
+                null
+        );
+        return killedPlayer;
     }
 
     private void setTimer() {

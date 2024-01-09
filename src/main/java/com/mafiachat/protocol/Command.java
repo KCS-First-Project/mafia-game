@@ -22,5 +22,7 @@ public enum Command {
     DAY_DEFENSE,
     DAY_SECOND_VOTE,
     NIGHT,
+    NOTIFY_ROLE,
+    VOTED_LIST,
     UNKNOWN;
 }
