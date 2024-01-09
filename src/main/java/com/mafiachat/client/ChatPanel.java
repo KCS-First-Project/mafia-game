@@ -234,6 +234,8 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 getFirstVotedList(msg);
                 break;
             case LOBBY:
+                vote.setVisible(false);
+                Ready.setVisible(true);
                 phase = Phase.LOBBY;
                 break;
             case DAY_CHAT:
@@ -357,20 +359,18 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 
             }else if(phase == Phase.DAY_SECOND_VOTE){
                 int playerNum = fistVotedList.size();
-                String[] votePlayer = new String[playerNum+1];
+                String[] votePlayer = new String[playerNum];
                 int idx = 0;
                 for (String playerId : fistVotedList.keySet()) {
                     votePlayer[idx++] = playerId;
                 }
-                votePlayer[playerNum] = "살리기";
+//                votePlayer[playerNum] = "살리기";
                 int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "최종 투표", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, null);
-                if(killedPlayer != playerNum){
-                    ChatRequest request = ChatRequest.createRequest(Command.VOTE, String.valueOf(fistVotedList.get(votePlayer[killedPlayer])));
-                    String killP = request.getFormattedMessage();
-                    writer.println(killP);
-                    System.out.println(killP);
-                    setVoteDisable();
-                }
+                ChatRequest request = ChatRequest.createRequest(Command.VOTE, String.valueOf(fistVotedList.get(votePlayer[killedPlayer])));
+                String killP = request.getFormattedMessage();
+                writer.println(killP);
+                System.out.println(killP);
+                setVoteDisable();
 
             }else if(phase == Phase.NIGHT){
                 int playerNum = playerList.size();

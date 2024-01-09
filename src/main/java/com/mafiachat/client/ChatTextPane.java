@@ -51,17 +51,7 @@ public class ChatTextPane extends JTextPane{
 		int count = doc.getDefaultRootElement().getElementCount();
 		try {
 			doc.insertString(doc.getLength(), msg+"\n", attrset);
-			System.out.println("line count: " + count);
-			if(count >= maxLines) {
-				int line = count - linesToHold - 1;
-				Element map = getDocument().getDefaultRootElement();
-				Element lineElem = map.getElement(line);
-				int endOffset = lineElem.getEndOffset();
-				// hide the implicit break at the end of the document
-				endOffset = ((line == count - 1) ? (endOffset - 1) : endOffset);
-				System.out.println();
-				doc.remove(0, endOffset);
-			}
+			setCaretPosition(doc.getLength());
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

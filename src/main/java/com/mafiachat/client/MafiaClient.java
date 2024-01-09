@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 
 public class MafiaClient implements ChatConnector {
@@ -36,7 +34,7 @@ public class MafiaClient implements ChatConnector {
 		startWindow.setVisible(true);
 		startWindow.setResizable(false);
 		gameWindow = new JFrame("MafiaChat");
-		
+
 		
 		
 		JPanel contentPane = new JPanel(new BorderLayout());
@@ -58,11 +56,13 @@ public class MafiaClient implements ChatConnector {
 		gameWindow.setSize(800, 600);
 		gameWindow.setVisible(false);
 		gameWindow.setResizable(false);
+		gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		GamePanel gamePanel = new GamePanel();
 		startPanel.play.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				startWindow.setVisible(false);	
+				startWindow.setVisible(false);
+				startWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 				gameWindow.setVisible(true);
 				connect();// 커넥트 위치 수정
 				
