@@ -403,10 +403,11 @@ public class GameManager {
         List<String> userRoleMessages = playerGroup.stream()
                 .map((p) -> "%s(%d) 플레이어는 %s입니다.".formatted(p.getClientName(), p.getId(), p.getRole().description))
                 .toList();
+        ChatRequest gameResultRequest = ChatRequest.createSystemRequest(gameResult.announceMessage);
+        groupManager.broadcastMessage(gameResultRequest);
         for (String userRoleMessage: userRoleMessages) {
-            String announceMessage = "%s\n%s".formatted(gameResult.announceMessage, userRoleMessage);
-            ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
-            groupManager.broadcastMessage(request);
+            ChatRequest roleRequest = ChatRequest.createSystemRequest(userRoleMessage);
+            groupManager.broadcastMessage(roleRequest);
         }
     }
 
