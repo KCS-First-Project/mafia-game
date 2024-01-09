@@ -400,12 +400,14 @@ public class GameManager {
     }
 
     private void announceResult(GameResult gameResult) {
-        String userRoleList = playerGroup.stream()
+        List<String> userRoleMessages = playerGroup.stream()
                 .map((p) -> "%s(%d) 플레이어는 %s입니다.".formatted(p.getClientName(), p.getId(), p.getRole().description))
-                .collect(Collectors.joining("\n"));
-        String announceMessage = "%s\n%s".formatted(gameResult.announceMessage, userRoleList);
-        ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
-        groupManager.broadcastMessage(request);
+                .toList();
+        for (String userRoleMessage: userRoleMessages) {
+            String announceMessage = "%s\n%s".formatted(gameResult.announceMessage, userRoleMessage);
+            ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
+            groupManager.broadcastMessage(request);
+        }
     }
 
     private GameResult getGameResult() {
