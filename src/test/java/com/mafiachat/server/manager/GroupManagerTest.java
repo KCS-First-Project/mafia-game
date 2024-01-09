@@ -56,8 +56,8 @@ public class GroupManagerTest {
     @ParameterizedTest
     @DisplayName("클라 id 자동 생성 테스트")
     @MethodSource("getTestcaseForCreateClientId")
-    public void testCreateClientId(int expectedId) {
-        int id = groupManager.createClientId();
+    public void testCreateClientId(GroupManager spyGroupManager, int expectedId) {
+        int id = spyGroupManager.createClientId();
         assertThat(id).isEqualTo(expectedId);
     }
 
@@ -204,11 +204,12 @@ public class GroupManagerTest {
     }
 
     private Stream<Arguments> getTestcaseForCreateClientId() {
+        GroupManager spyGroupManager = spy(GroupManager.class);
         return Stream.of(
-                Arguments.of(1),
-                Arguments.of(2),
-                Arguments.of(3),
-                Arguments.of(4)
+                Arguments.of(spyGroupManager, 1),
+                Arguments.of(spyGroupManager, 2),
+                Arguments.of(spyGroupManager, 3),
+                Arguments.of(spyGroupManager, 4)
         );
     }
 

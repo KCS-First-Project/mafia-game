@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,8 @@ class PlayerTest {
     @Mock
     private GameManager gameManager;
 
+    private GameManager spyGameManager;
+
     private Player player;
 
     @BeforeEach
@@ -48,6 +51,7 @@ class PlayerTest {
         chatServer = new ChatServer(GroupManager.getInstance(), GameManager.getInstance());
         serverThread = new Thread(chatServer);
         serverThread.start();
+        spyGameManager = spy(GameManager.getInstance());
     }
 
     @BeforeEach
@@ -66,12 +70,13 @@ class PlayerTest {
     public void vote(int voteCount) {
         //given
         ChatRequest request = ChatRequest.createRequest(Command.VOTE, "1");
+        Player player = new Player(spyGameManager);
 
         //when
         player.vote(request);
 
         //then
-        assertEquals(voteCount, GameManager.getInstance().getVoteCountById(1));
+        assertEquals(voteCount, spyGameManager.getVoteCountById(1));
     }
 
     @DisplayName("밤에 시민이 아닌 역할들 대화 테스트")
