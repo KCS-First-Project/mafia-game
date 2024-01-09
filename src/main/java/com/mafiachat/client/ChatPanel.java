@@ -7,7 +7,7 @@ import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
 import com.mafiachat.server.Phase;
-import com.mafiachat.client.GameTimer;
+import com.mafiachat.util.Constant;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,7 +33,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
     Phase phase = Phase.LOBBY;
 
     private JLabel timerLabel;
-    private GameTimer gameTimer;
+    private final GameTimer gameTimer = GameTimer.getInstance();
 
     public ChatPanel(ChatConnector c) {
         super(new GridBagLayout());
@@ -63,6 +63,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         JPanel timerPanel = new JPanel();
         timerPanel.setOpaque(false); // 투명하게 설정
         JLabel timerLabel = new JLabel("00:00", JLabel.CENTER);
+        gameTimer.setCountDownListener(timerLabel);
 
         timerLabel.setForeground(Color.WHITE);
         setBackground(Color.BLACK);
@@ -73,11 +74,6 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         c.gridwidth = 2;
         c.insets = new Insets(2, 2, 2, 2);
         add(timerLabel, c);
-
-        // GameTimer 객체 생성 및 초기화
-        gameTimer = new GameTimer(180, timerLabel); // 3분(180초) 타이머로 설정
-        // 타이머 시작 -> 현재 play시작하면 바로 시작되도록 구현됨(커스터마이징 필요)
-        gameTimer.startTimer();
 
         mafiaLabel.setPreferredSize(new Dimension(50, 50)); // 선호 크기 설정
         c.gridy = 0;
@@ -227,18 +223,23 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 break;
             case DAY_CHAT:
                 phase = Phase.DAY_CHAT;
+                setTimer();
                 break;
             case DAY_FIRST_VOTE:
                 phase = Phase.DAY_FIRST_VOTE;
+                setTimer();
                 break;
             case DAY_DEFENSE:
                 phase = Phase.DAY_DEFENSE;
+                setTimer();
                 break;
             case DAY_SECOND_VOTE:
                 phase = Phase.DAY_SECOND_VOTE;
+                setTimer();
                 break;
             case NIGHT:
                 phase = Phase.NIGHT;
+                setTimer();
                 break;
             case UNKNOWN:
                 System.out.println("잘못된 명령입니다.");
@@ -322,6 +323,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         }
     }
 
+    private void setTimer() {
+        int seconds = phase.timeLimit / Constant.THOUSAND_MILLI_SECOND;
+        gameTimer.startTimer(seconds);
+    }
 
     private static class RoundBorder implements Border {
         private int radius;
