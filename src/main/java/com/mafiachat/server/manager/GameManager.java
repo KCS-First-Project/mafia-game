@@ -139,6 +139,7 @@ public class GameManager {
     }
 
     private static void startDayChat() throws InterruptedException {
+        notifyPlayerList();
         GameResult gameResult = getGameResult();
         if (gameResult != GameResult.RESUME) {
             endGame(gameResult);

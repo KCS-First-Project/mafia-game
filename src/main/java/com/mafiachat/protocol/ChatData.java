@@ -43,6 +43,7 @@ public class ChatData {
             String command = request.split("[\\[\\]]")[1];
             return Command.valueOf(command);
         } catch (Exception e) {
+            System.out.println("추출오류");
             return Command.UNKNOWN;
         }
     }

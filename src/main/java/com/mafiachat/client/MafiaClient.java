@@ -34,6 +34,7 @@ public class MafiaClient implements ChatConnector {
 		StartPanel startPanel = new StartPanel();
 		startWindow.add(startPanel);
 		startWindow.setVisible(true);
+		startWindow.setResizable(false);
 		gameWindow = new JFrame("MafiaChat");
 		
 		
@@ -52,16 +53,18 @@ public class MafiaClient implements ChatConnector {
 
 		this.addChatSocketListener(chatPanel);
 		this.addChatSocketListener(chatReceiver);
-		connect();
+
 		
-		gameWindow.setSize(500, 400);
+		gameWindow.setSize(800, 600);
 		gameWindow.setVisible(false);
+		gameWindow.setResizable(false);
 		GamePanel gamePanel = new GamePanel();
 		startPanel.play.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				startWindow.setVisible(false);	
 				gameWindow.setVisible(true);
+				connect();// 커넥트 위치 수정
 				
 			}	
 		});

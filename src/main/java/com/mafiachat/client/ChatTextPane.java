@@ -1,4 +1,6 @@
 package com.mafiachat.client;
+import com.mafiachat.protocol.Command;
+
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 
@@ -24,9 +26,9 @@ public class ChatTextPane extends JTextPane{
         normalAttrSet = sc.addAttribute(normalAttrSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
         
         sc = new StyleContext();
-        enterExitAttrSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, Color.BLUE.darker());
+        enterExitAttrSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, Color.RED.darker());
         enterExitAttrSet = sc.addAttribute(enterExitAttrSet, StyleConstants.FontFamily, "Lucida Console");
-        enterExitAttrSet = sc.addAttribute(enterExitAttrSet, StyleConstants.Italic, true);
+//        enterExitAttrSet = sc.addAttribute(enterExitAttrSet, StyleConstants.Italic, true);
         enterExitAttrSet = sc.addAttribute(enterExitAttrSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
         
         sc = new StyleContext();
@@ -35,8 +37,16 @@ public class ChatTextPane extends JTextPane{
         whisperAttrSet = sc.addAttribute(whisperAttrSet, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
 	}
 
-	public void append(String msg) {
-		AttributeSet attrset =  normalAttrSet;
+	public void append(String msg, Command command) {
+		AttributeSet attrset;
+		if(command == Command.SYSTEM){
+			attrset = enterExitAttrSet;
+		}else if(command == Command.EXIT_ROOM || command == Command.ENTER_ROOM){
+			attrset = whisperAttrSet;
+		}
+		else{
+			attrset =normalAttrSet;
+		}
 		Document doc = getDocument();
 		int count = doc.getDefaultRootElement().getElementCount();
 		try {
