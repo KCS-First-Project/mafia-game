@@ -104,9 +104,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         c.gridy = 1;
         c.gridx = 0;
         c.weighty = 1.0f;
-        c.fill = GridBagConstraints.BOTH;
+//        c.fill = GridBagConstraints.BOTH;
         c.weightx = 0.9;
         c.insets = new Insets(1, 2, 0, 2);
+        chatDispArea.setPreferredSize(new Dimension(550, 400));
         JScrollPane scrollPane = new JScrollPane(chatDispArea);
 
         scrollPane.setViewportBorder(new RoundBorder(15));
