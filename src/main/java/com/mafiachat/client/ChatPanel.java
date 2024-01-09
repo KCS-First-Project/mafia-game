@@ -17,6 +17,8 @@ import java.io.*;
 import java.awt.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -30,7 +32,11 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
     JButton vote;
     StringBuilder msgBuilder = new StringBuilder();
     ArrayList<ChatUser> playerList = new ArrayList<ChatUser>(); //생존 플레이어를 확인하기 위한 playerList추가
+
+    Map<String,Integer> fistVotedList = new HashMap<>(); //투표된 사람 함수 추가
     Phase phase = Phase.LOBBY;
+
+    String playerName = "anonymous";
 
     private JLabel timerLabel;
     private GameTimer gameTimer;
@@ -150,7 +156,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String msgToSend = chatTextField.getText();
-                    ChatRequest request = ChatRequest.createRequest(Command.NORMAL, msgToSend);
+                    ChatRequest request = ChatRequest.createRequest(Command.NORMAL, playerName + " : " + msgToSend);
                     msgToSend = request.getFormattedMessage();
                     if (msgToSend.trim().equals("")) return;
 
@@ -174,17 +180,17 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         c.gridx = 2;
         c.anchor = GridBagConstraints.CENTER;
         Ready.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-        Ready.setBackground(Color.BLUE);
+        Ready.setBackground(new Color( 240,86,80));
         Ready.setForeground(Color.WHITE);
 //	    Ready.setFocusPainted(false); // 포커스 테두리 제거
-        Ready.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
+        Ready.setPreferredSize(new Dimension(150, 28)); // 필요에 따라 크기 조절
         Ready.setBorder(new RoundBorder(10));
         vote.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-        vote.setBackground(Color.blue);
+        vote.setBackground(new Color(111,173,207));
         vote.setForeground(Color.WHITE);
-        vote.setPreferredSize(new Dimension(100, 30)); // 필요에 따라 크기 조절
+        vote.setPreferredSize(new Dimension(150, 28)); // 필요에 따라 크기 조절
         vote.setFocusPainted(false); // 포커스 테두리 제거
-        vote.setBorder(new RoundBorder(20));
+        vote.setBorder(new RoundBorder(10));
 
         add(vote, c);
 
@@ -206,15 +212,19 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
     @Override
     public void messageArrived(ChatResponse response) {
         Command command = response.getCommand();
+        System.out.println(response.getFormattedMessage());
         System.out.println(response.getCommand());
         String msg = response.getBody();
         switch (command) {
-            case NORMAL:
             case SYSTEM:
+                if(phase == Phase.DAY_FIRST_VOTE){
+                    fistVotedList = votedUserList(msg);
+                }
+            case NORMAL:
             case ENTER_ROOM:
             case EXIT_ROOM:
                 System.out.println(msg);
-                chatDispArea.append(msg);
+                chatDispArea.append(msg,command);
                 break;
             case USER_LIST:
                 displayUserList(msg);
@@ -229,19 +239,25 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 phase = Phase.DAY_CHAT;
                 break;
             case DAY_FIRST_VOTE:
+                setVoteEnabled();
                 phase = Phase.DAY_FIRST_VOTE;
                 break;
             case DAY_DEFENSE:
                 phase = Phase.DAY_DEFENSE;
                 break;
             case DAY_SECOND_VOTE:
+                setVoteEnabled();
                 phase = Phase.DAY_SECOND_VOTE;
                 break;
             case NIGHT:
+                setVoteEnabled();
                 phase = Phase.NIGHT;
+                break;
+            case ACT_ROLE:
                 break;
             case UNKNOWN:
                 System.out.println("잘못된 명령입니다.");
+                System.out.println(msg);
                 break;
             default:
                 break;
@@ -260,6 +276,23 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         userList.addNewUsers(list);
     }
 
+    private Map<String,Integer> votedUserList(String users){
+        users = users.replaceFirst("\\[.*?\\]", "").trim();
+        if(users.startsWith("첫")||users.startsWith("투")){
+            return new HashMap<>();
+        }
+        String[] userList = users.split(", ");
+
+        for (String user : userList) {
+            String[] parts = user.split("\\(");
+            String nickname = parts[0];
+            int id = Integer.parseInt(parts[1].substring(0, parts[1].length() - 1));
+
+            fistVotedList.put(nickname, id);
+        }
+        return fistVotedList;
+    }
+
     private ArrayList<ChatUser> playUserList(String users) { //플레이 유저 리스트를 갱신하는 함수 추가
         String[] PlayUsers = users.split("\\|");
         String[] nameWithIdHostAlive;
@@ -274,54 +307,93 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         return list;
     }
 
+
     @Override
     public void actionPerformed(ActionEvent e) {
         //레디버튼누르면 레디보냄
         if (e.getSource() == Ready) {
-            String msgToSend;
-            ChatRequest readyRequest = ChatRequest.createRequest(Command.READY, "");
-            msgToSend = readyRequest.getFormattedMessage();
-            System.out.println(msgToSend);
-            writer.println(msgToSend);
-
-
             String chatName = JOptionPane.showInputDialog(null, "Enter chat name:");
+            playerName = chatName;
             ChatRequest request = ChatRequest.createRequest(Command.INIT_ALIAS, chatName);
             chatName = request.getFormattedMessage();
             writer.println(chatName);
 
-            System.out.println("sadasd");
             Ready.setVisible(false);
             vote.setVisible(true);
+
+            String msgToSend; //ready 위치 수정
+            ChatRequest readyRequest = ChatRequest.createRequest(Command.READY, "");
+            msgToSend = readyRequest.getFormattedMessage();
+            System.out.println(msgToSend);
+            writer.println(msgToSend);
+            setVoteDisable();
         } else if (e.getSource() == vote) {
-
-            if (phase == Phase.DAY_SECOND_VOTE) {
-
-            }
             //처음 투표시 생존인원 투표
             if (phase == Phase.DAY_FIRST_VOTE) {
                 int playerNum = playerList.size();
-                String[] votePlayer = new String[8];
+                String[] votePlayer = new String[playerNum];
                 for (int i = 0; i < playerNum; i++) {
                     votePlayer[i] = playerList.get(i).getName();
                 }
-                //테스트 값들
-//				String[] votePlayer = {"태우", "지훈", "혜인", "주현"};
+
                 int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "플레이어 선택", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
 
 
                 System.out.println(killedPlayer);
                 //실제 아이디 보내주기
                 ChatRequest request = ChatRequest.createRequest(Command.VOTE, playerList.get(killedPlayer).getId());
-//				ChatRequest request = ChatRequest.createRequest(Command.VOTE, "1");
                 String killP = request.getFormattedMessage();
                 writer.println(killP);
                 System.out.println(killP);
+                setVoteDisable();
 
+            }else if(phase == Phase.DAY_SECOND_VOTE){
+                int playerNum = fistVotedList.size();
+                String[] votePlayer = new String[playerNum+1];
+                int idx = 0;
+                for (String playerId : fistVotedList.keySet()) {
+                    votePlayer[idx++] = playerId;
+                }
+                votePlayer[playerNum] = "살리기";
+                int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "최종 투표", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, null);
+                if(killedPlayer != playerNum){
+                    ChatRequest request = ChatRequest.createRequest(Command.VOTE, String.valueOf(fistVotedList.get(votePlayer[killedPlayer])));
+                    String killP = request.getFormattedMessage();
+                    writer.println(killP);
+                    System.out.println(killP);
+                    setVoteDisable();
+                }
+
+            }else if(phase == Phase.NIGHT){
+                int playerNum = playerList.size();
+                String[] votePlayer = new String[playerNum];
+                for (int i = 0; i < playerNum; i++) {
+                    votePlayer[i] = playerList.get(i).getName();
+                }
+
+                int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "직업행동", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
+
+
+                System.out.println(killedPlayer);
+                //실제 아이디 보내주기
+                ChatRequest request = ChatRequest.createRequest(Command.VOTE, playerList.get(killedPlayer).getId());
+                String killP = request.getFormattedMessage();
+                writer.println(killP);
+                System.out.println(killP);
+                setVoteDisable();
             }
         }
     }
 
+    private void setVoteDisable(){
+        vote.setEnabled(false);
+        vote.setBackground(Color.GRAY);
+    }
+
+    private void setVoteEnabled(){
+        vote.setEnabled(true);
+        vote.setBackground(new Color(111,173,207));
+    }
 
     private static class RoundBorder implements Border {
         private int radius;
