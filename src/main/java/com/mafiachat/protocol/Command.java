@@ -11,8 +11,10 @@ public enum Command {
 
     //Game 관련
     READY,
+    NOTIFY_ROLE,
     PLAYER_LIST,
     VOTE,
+    VOTED_LIST,
     ACT_ROLE,
 
     //phase notify 커맨드
