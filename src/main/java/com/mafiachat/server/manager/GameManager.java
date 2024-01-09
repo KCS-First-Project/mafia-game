@@ -11,6 +11,7 @@ import com.mafiachat.server.Role;
 import com.mafiachat.server.RoleAssignment;
 import com.mafiachat.server.handler.ClientHandler;
 import com.mafiachat.server.handler.PlayerHandler;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -201,8 +202,15 @@ public class GameManager {
         String announceMessage = mostVotedPlayerIds.stream()
                 .map((id) -> "%s(%d)".formatted(groupManager.findClientNameById(id), id))
                 .collect(Collectors.joining(", "));
-        ChatRequest request = ChatRequest.createSystemRequest(announceMessage);
-        groupManager.broadcastMessage(request);
+        ChatRequest votedNamesRequest = ChatRequest.createSystemRequest(announceMessage);
+        ChatRequest votedListRequest = ChatRequest.createRequest(
+                Command.VOTED_LIST,
+                mostVotedPlayerIds.stream()
+                        .map("%d"::formatted)
+                        .collect(Collectors.joining(","))
+        );
+        groupManager.broadcastMessage(votedNamesRequest);
+        groupManager.broadcastMessage(votedListRequest);
 
         onPhase(Phase.DAY_DEFENSE);
 
@@ -369,9 +377,13 @@ public class GameManager {
 
     private void announceRole() {
         for (PlayerHandler player : playerGroup) {
-            ChatRequest request = ChatRequest.createSystemRequest(
-                    "당신의 역할은 %s입니다.".formatted(player.getRole().description));
-            groupManager.unicastMessage(request, player);
+            Role role = player.getRole();
+            ChatRequest roleAnnounceRequest = ChatRequest.createSystemRequest(
+                    "당신의 역할은 %s입니다.".formatted(role.description));
+            groupManager.unicastMessage(roleAnnounceRequest, player);
+
+            ChatRequest roleNotifyRequest = ChatRequest.createRequest(Command.NOTIFY_ROLE, role.name());
+            groupManager.unicastMessage(roleNotifyRequest, player);
         }
     }
 
