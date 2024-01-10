@@ -1,9 +1,9 @@
 package com.mafiachat.server;
 
-import java.util.HashMap;
 
-import static com.mafiachat.util.Constant.MAX_PLAYER_NUMBER;
 import static com.mafiachat.util.Constant.MIN_PLAYER_NUMBER;
+
+import java.util.HashMap;
 
 public enum RoleAssignment {
     FIVE_PLAYERS(3, 1, 1, 0),

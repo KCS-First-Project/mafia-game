@@ -1,10 +1,11 @@
 package com.mafiachat.server;
 
+
 import static com.mafiachat.util.Constant.THOUSAND_MILLI_SECOND;
 
 public enum Phase {
     LOBBY(0, ""),
-    DAY_CHAT(30 * THOUSAND_MILLI_SECOND, "마피아로 의심되는 플레이어에 대해 논의합시다."),
+    DAY_CHAT(30 * THOUSAND_MILLI_SECOND, "낮 입니다. 마피아로 의심되는 플레이어에 대해 논의합시다."),
     DAY_FIRST_VOTE(15 * THOUSAND_MILLI_SECOND, "첫 번째 투표 시간입니다."),
     DAY_DEFENSE(15 * THOUSAND_MILLI_SECOND, "마피아로 지목된 플레이어의 최후변론 시간입니다."),
     DAY_SECOND_VOTE(10 * THOUSAND_MILLI_SECOND, "두 번째 투표 시간입니다."),

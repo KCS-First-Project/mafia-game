@@ -11,6 +11,7 @@ public class ChatResponse extends ChatData {
         String formattedMessage = createFormattedMessage(command, body);
         return new ChatResponse(formattedMessage);
     }
+
     public static ChatResponse createNormalResponse(String body) {
         return createResponse(Command.NORMAL, body);
     }
