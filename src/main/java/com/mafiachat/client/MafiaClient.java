@@ -1,137 +1,62 @@
 package com.mafiachat.client;
 
 import com.mafiachat.client.event.ChatConnector;
-import com.mafiachat.client.event.ChatSocketListener;
-
+import com.mafiachat.client.event.ChatConnectorImpl;
+import com.mafiachat.client.panel.ChatPanel;
+import com.mafiachat.client.panel.StartPanel;
+import com.mafiachat.client.protocol.ChatMessageReceiver;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
-
-import javax.swing.*;
+import java.util.logging.Logger;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 
-public class MafiaClient implements ChatConnector {
+public class MafiaClient {
+    private JFrame startWindow;
+    private JFrame gameWindow;
+    private final ChatConnector chatConnector;
+    private Logger logger = Logger.getLogger(ChatConnector.class.getName());
 
-	public static void main(String[] args) {
-		new MafiaClient();
-	}
-	private String host;
-	private int port=1223;
-	private Socket socket;
-	private JFrame startWindow;
-	private JFrame gameWindow;
+    MafiaClient() {
+        chatConnector = new ChatConnectorImpl();
 
-	private ArrayList<ChatSocketListener> sListeners = new ArrayList<ChatSocketListener>();
-	MafiaClient() {
-		
-		startWindow = new JFrame("MafiaStart");
-		startWindow.setSize(500, 400);
-		StartPanel startPanel = new StartPanel();
-		startWindow.add(startPanel);
-		startWindow.setVisible(true);
-		startWindow.setResizable(false);
-		gameWindow = new JFrame("MafiaChat");
+        JPanel contentPane = new JPanel(new BorderLayout());
+        contentPane.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
 
-		
-		
-		JPanel contentPane = new JPanel(new BorderLayout());
-		contentPane.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
-		ChatPanel chatPanel = new ChatPanel(this);
+        StartPanel startPanel = new StartPanel();
+        startWindow = new JFrame("MafiaStart");
+        startWindow.setSize(500, 400);
+        startWindow.add(startPanel);
+        startWindow.setVisible(true);
+        startWindow.setResizable(false);
 
+        ChatPanel chatPanel = new ChatPanel(chatConnector);
+        contentPane.add(chatPanel);
 
-		ChatMessageReceiver chatReceiver = new ChatMessageReceiver(this);
-		chatReceiver.setMessageReceiver(chatPanel);
+        ChatMessageReceiver chatReceiver = new ChatMessageReceiver(chatConnector);
+        chatReceiver.setMessageReceiver(chatPanel);
 
-		contentPane.add(chatPanel);
-//		
-		gameWindow.setContentPane(contentPane);
+        chatConnector.addChatSocketListener(chatPanel);
+        chatConnector.addChatSocketListener(chatReceiver);
 
-		this.addChatSocketListener(chatPanel);
-		this.addChatSocketListener(chatReceiver);
+        gameWindow = new JFrame("MafiaChat");
+        gameWindow.setContentPane(contentPane);
+        gameWindow.setSize(800, 600);
+        gameWindow.setVisible(false);
+        gameWindow.setResizable(false);
 
-		
-		gameWindow.setSize(800, 600);
-		gameWindow.setVisible(false);
-		gameWindow.setResizable(false);
-		gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		GamePanel gamePanel = new GamePanel();
-		startPanel.play.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				startWindow.setVisible(false);
-				startWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-				gameWindow.setVisible(true);
-				connect();// 커넥트 위치 수정
-				
-			}	
-		});
-	
-		
-	}
-
-
-	public boolean connect() {
-		if(socketAvailable()) return true;
-		try 
-		{
-			socket = new Socket(host, port);
-			for(ChatSocketListener lsnr: sListeners) {
-				lsnr.socketConnected(socket);
-				
-			}
-			return true;
-		} catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
+        gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        startPanel.play.addActionListener(e -> {
+            startWindow.setVisible(false);
+            startWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            gameWindow.setVisible(true);
+            chatConnector.connect();
+        });
     }
-	public void disConnect() 
-	{
-		if(!(socket.isClosed())) 
-		{
-			try 
-			{
-				socket.close();
-			} catch(IOException ex) 
-			{
-			}
-		}
-	}
 
-	@Override
-	public Socket getSocket() {
-		return null;
-	}
-
-
-	public boolean socketAvailable() 
-	{
-		return !(socket == null || socket.isClosed());
-	}
-
-	@Override
-	public void invalidateSocket() {
-
-	}
-
-	@Override
-	public String getName() {
-		return null;
-	}
-
-	@Override
-	public String getId() {
-		return null;
-	}
-	public void addChatSocketListener(ChatSocketListener lsnr) {
-		sListeners.add(lsnr);
-	}
-	public void removeChatSocketListener(ChatSocketListener lsnr) {
-		sListeners.remove(lsnr);
-	}
+    public static void main(String[] args) {
+        new MafiaClient();
+    }
 }
