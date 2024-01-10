@@ -3,12 +3,14 @@ package com.mafiachat.server;
 import static com.mafiachat.util.Constant.SERVER_HOST;
 import static com.mafiachat.util.Constant.SERVER_PORT;
 
+import com.mafiachat.client.util.ImageProvider;
 import com.mafiachat.server.handler.Player.Player;
 import com.mafiachat.server.handler.PlayerHandler;
 import com.mafiachat.server.manager.GameManager;
 import com.mafiachat.server.manager.GroupManager;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -70,6 +72,8 @@ public class ChatServer implements Runnable {
         serverWindow.setSize(500, 400);
         serverWindow.setVisible(true);
         serverWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        ImageIcon mafiaIcon = ImageProvider.getInstance().getMafiaIcon();
+        serverWindow.setIconImage(mafiaIcon.getImage());
     }
 
     private static boolean tryRunServer() {
