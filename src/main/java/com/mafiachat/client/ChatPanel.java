@@ -104,10 +104,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         c.gridy = 1;
         c.gridx = 0;
         c.weighty = 1.0f;
-//        c.fill = GridBagConstraints.BOTH;
+        c.fill = GridBagConstraints.BOTH;
         c.weightx = 0.9;
         c.insets = new Insets(1, 2, 0, 2);
-        chatDispArea.setPreferredSize(new Dimension(550, 400));
         JScrollPane scrollPane = new JScrollPane(chatDispArea);
 
         scrollPane.setViewportBorder(new RoundBorder(15));
@@ -329,8 +328,8 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
             chatName = request.getFormattedMessage();
             writer.println(chatName);
 
-            Ready.setVisible(false);
             vote.setVisible(true);
+            Ready.setVisible(false);
 
             String msgToSend; //ready 위치 수정
             ChatRequest readyRequest = ChatRequest.createRequest(Command.READY, "");
@@ -348,7 +347,6 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 }
 
                 int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "플레이어 선택", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
-
 
                 System.out.println(killedPlayer);
                 //실제 아이디 보내주기
@@ -392,7 +390,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 
                 System.out.println(killedPlayer);
                 //실제 아이디 보내주기
-                ChatRequest request = ChatRequest.createRequest(Command.VOTE, playerList.get(killedPlayer).getId());
+                ChatRequest request = ChatRequest.createRequest(Command.ACT_ROLE, playerList.get(killedPlayer).getId());
                 String killP = request.getFormattedMessage();
                 writer.println(killP);
                 System.out.println(killP);
