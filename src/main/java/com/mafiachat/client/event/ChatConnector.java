@@ -3,7 +3,7 @@ package com.mafiachat.client.event;
 import java.net.Socket;
 
 public interface ChatConnector {
-    boolean connect();
+    boolean connect(String host, int port);
 
     void disConnect();
 

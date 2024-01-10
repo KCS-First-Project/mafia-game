@@ -1,10 +1,8 @@
 package com.mafiachat.client.panel;
 
-import static com.mafiachat.util.Constant.IMAGE_FILE;
-
+import com.mafiachat.client.util.ImageProvider;
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -14,7 +12,6 @@ import javax.swing.SwingUtilities;
 public class StartPanel extends JPanel {
     private static final String GAME_NAME = "MIDS(Mafia Invasion Detection System)";
     private JLabel mafiaImage;
-    private JLabel midsLabel;
     public JButton play;
     private JButton quit;
 
@@ -22,8 +19,8 @@ public class StartPanel extends JPanel {
         setLayout(null);
         setBackground(Color.BLACK);
 
-        mafiaImage = new JLabel(new ImageIcon(IMAGE_FILE));
-//		mafiaImage.setIcon(new ImageIcon(IMAGE_FILE));
+        mafiaImage = new JLabel();
+        mafiaImage.setIcon(ImageProvider.getInstance().getMafiaIcon());
         mafiaImage.setBounds(150, 50, 200, 170);
         add(mafiaImage);
 

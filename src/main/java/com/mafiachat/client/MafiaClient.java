@@ -5,10 +5,12 @@ import com.mafiachat.client.event.ChatConnectorImpl;
 import com.mafiachat.client.panel.ChatPanel;
 import com.mafiachat.client.panel.StartPanel;
 import com.mafiachat.client.protocol.ChatMessageReceiver;
+import com.mafiachat.util.Constant;
 import java.awt.BorderLayout;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
@@ -18,6 +20,8 @@ public class MafiaClient {
     private JFrame gameWindow;
     private final ChatConnector chatConnector;
     private Logger logger = Logger.getLogger(ChatConnector.class.getName());
+    private String host;
+    private int port;
 
     MafiaClient() {
         chatConnector = new ChatConnectorImpl();
@@ -31,6 +35,7 @@ public class MafiaClient {
         startWindow.add(startPanel);
         startWindow.setVisible(true);
         startWindow.setResizable(false);
+        startWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         ChatPanel chatPanel = new ChatPanel(chatConnector);
         contentPane.add(chatPanel);
@@ -49,14 +54,25 @@ public class MafiaClient {
 
         gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         startPanel.play.addActionListener(e -> {
+            setHostAndPortUsingDialog();
+            if (!chatConnector.connect(host, port)) {
+                return;
+            }
             startWindow.setVisible(false);
-            startWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             gameWindow.setVisible(true);
-            chatConnector.connect();
         });
     }
 
     public static void main(String[] args) {
         new MafiaClient();
+    }
+
+    private void setHostAndPortUsingDialog() {
+        host = JOptionPane.showInputDialog("접속 호스트를 입력하세요.");
+        try {
+            port = Integer.parseInt(JOptionPane.showInputDialog("접속 포트를 입력하세요."));
+        } catch (NumberFormatException e) {
+            port = Constant.SERVER_PORT;
+        }
     }
 }

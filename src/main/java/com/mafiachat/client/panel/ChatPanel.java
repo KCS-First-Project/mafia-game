@@ -3,7 +3,6 @@ package com.mafiachat.client.panel;
 import static com.mafiachat.client.user.ChatUser.createChatUserAlive;
 import static com.mafiachat.client.user.ChatUser.createChatUserSetAlive;
 import static com.mafiachat.server.Phase.LOBBY;
-import static com.mafiachat.util.Constant.IMAGE_FILE;
 import static com.mafiachat.util.Constant.THOUSAND_MILLI_SECOND;
 
 import com.mafiachat.client.event.ChatConnector;
@@ -11,6 +10,7 @@ import com.mafiachat.client.event.ChatSocketListener;
 import com.mafiachat.client.event.MessageReceiver;
 import com.mafiachat.client.user.ChatUser;
 import com.mafiachat.client.util.ChatTextPane;
+import com.mafiachat.client.util.ImageProvider;
 import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
@@ -23,7 +23,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,7 +77,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         userList = new ChatUserList();
         userList.setBackground(Color.LIGHT_GRAY);
 
-        chatDisplayArea = new ChatTextPane();//new ChatTextArea();
+        chatDisplayArea = new ChatTextPane();
         chatDisplayArea.setEditable(false);
 
         ready = new JButton("Ready");
@@ -86,10 +85,10 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
 
-        ImageIcon mafiaIcon = new ImageIcon(IMAGE_FILE);
-        Image mafiaImage = mafiaIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-        ImageIcon scaledMafiaIcon = new ImageIcon(mafiaImage);
-
+        GridBagConstraints c = new GridBagConstraints();
+        //마피아 이미지 크기줄여 붙이기
+        ImageIcon scaledMafiaIcon = ImageProvider.getInstance().getScaledMafiaIcon();
+        JLabel mafiaLabel = new JLabel(scaledMafiaIcon, JLabel.CENTER);
         JPanel timerPanel = new JPanel();
         timerPanel.setOpaque(false); // 투명하게 설정
         JLabel timerLabel = new JLabel("00:00", JLabel.CENTER);
@@ -104,7 +103,6 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         gridBagConstraints.insets = new Insets(2, 2, 2, 2);
         add(timerLabel, gridBagConstraints);
 
-        JLabel mafiaLabel = new JLabel(scaledMafiaIcon, JLabel.CENTER);
         mafiaLabel.setPreferredSize(new Dimension(50, 50)); // 선호 크기 설정
 
         gridBagConstraints.gridy = 0;

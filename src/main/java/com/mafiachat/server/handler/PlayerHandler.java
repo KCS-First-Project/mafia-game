@@ -1,59 +1,62 @@
 package com.mafiachat.server.handler;
 
-import com.mafiachat.protocol.*;
-import com.mafiachat.protocol.ChatRequest;
-import com.mafiachat.server.Phase;
-import com.mafiachat.server.manager.GameManager;
-import com.mafiachat.server.manager.GroupManager;
-import com.mafiachat.server.Role;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.logging.Logger;
+import com.mafiachat.protocol.ChatRequest;
+import com.mafiachat.protocol.Command;
+import com.mafiachat.server.Role;
+import com.mafiachat.server.handler.Player.Playable;
+import com.mafiachat.server.handler.Player.Player;
+import com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GroupManager;
 
 public class PlayerHandler implements Runnable, ClientHandler {
+    private final GroupManager groupManager;
+    private final GameManager gameManager;
     private final Socket socket;
     private final BufferedReader br;
     private final PrintWriter pw;
     private final String host;
     private final int id;
-    private String chatName;
-    private boolean ready = false;
-    private boolean alive = true;
-    private Role role;
+    private final Playable player;
+    private static final Logger logger = Logger.getLogger(PlayerHandler.class.getSimpleName());
 
-    public PlayerHandler(Socket s) throws IOException {
-        this.socket = s;
-        this.host = socket.getInetAddress().getHostAddress();
-        this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.pw = new PrintWriter(socket.getOutputStream(), true);
-        this.id = GroupManager.createClientId();
-        this.chatName = "anonymous";
-        GroupManager.addClientHandler(this);
-        GameManager.addPlayerHandler(this);
+    public PlayerHandler(GroupManager groupManager, GameManager gameManager, Socket socket, Player player) throws IOException {
+        this.groupManager = groupManager;
+        this.gameManager = gameManager;
+        this.socket = socket;
+        this.host = this.socket.getInetAddress().getHostAddress();
+        this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+        this.pw = new PrintWriter(this.socket.getOutputStream(), true);
+        this.id = groupManager.createClientId();
+        this.player = player;
+        groupManager.addClientHandler(this);
+        gameManager.addPlayerHandler(this);
     }
 
     public void run() {
-        ChatRequest request;
         try {
             while (true) {
-                request = this.getRequest();
+                ChatRequest request = this.getRequest();
                 if (request == null) {
                     break;
                 }
                 processRequest(request);
-                System.out.println("lineRead: " + request.getFormattedMessage());
+                logger.info("lineRead: " + request.getFormattedMessage());
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            GroupManager.removeClientHandler(this);
-            GameManager.removePlayerHandler(this);
+            groupManager.removeClientHandler(this);
+            gameManager.removePlayerHandler(this);
             close();
         }
-        System.out.println("Terminating ClientHandler");
+        logger.info("Terminating ClientHandler");
     }
 
     @Override
@@ -63,7 +66,7 @@ public class PlayerHandler implements Runnable, ClientHandler {
 
     @Override
     public String getClientName() {
-        return this.chatName;
+        return player.getChatName();
     }
 
     @Override
@@ -95,72 +98,51 @@ public class PlayerHandler implements Runnable, ClientHandler {
         Command command = request.getCommand();
         switch (command) {
             case NORMAL:
-                sendNormalMessage(request);
+                player.talk(request);
                 break;
             case INIT_ALIAS:
-                initAlias(request);
+                player.setChatName(request.getBody());
+                groupManager.broadcastNewChatter(this);
                 break;
             case READY:
                 setReady();
-                GameManager.tryStartGame();
+                gameManager.tryStartGame();
                 break;
             case VOTE:
-                vote(request);
+                player.vote(request);
                 break;
             case ACT_ROLE:
-                targetPlayer(request);
+                player.targetPlayer(request, player.getRole());
                 break;
             default:
-                System.out.printf("ChatCommand %s \n", command.name());
+                logger.info(String.format("ChatCommand %s \n", command.name()));
         }
     }
 
 
     public Role getRole() {
-        return this.role;
+        return player.getRole();
     }
 
     public boolean isReady() {
-        return this.ready;
+        return player.isReady();
     }
 
     public boolean isAlive() {
-        return this.alive;
+        return player.isAlive();
     }
 
     public void setRole(Role role) {
-        this.role = role;
+        player.setRole(role);
     }
 
     public void setReady() {
-        this.ready = true;
+        player.setReady();
     }
 
     public void killInGame() {
-        this.alive = false;
+        player.killInGame();
     }
 
-    private void sendNormalMessage(ChatRequest request) {
-        if ((GameManager.getPhase() == Phase.NIGHT) && (this.role != Role.CITIZEN)) {
-            GameManager.broadcastNormalRoleMessage(role, request);
-        } else {
-            GroupManager.broadcastMessage(request);
-        }
-    }
 
-    private void initAlias(ChatRequest request) {
-        this.chatName = request.getBody();
-        GroupManager.broadcastNewChatter(this);
-    }
-
-    private void vote(ChatRequest request) {
-        int id = Integer.parseInt(request.getBody());
-        GameManager.vote(id);
-    }
-
-    private void targetPlayer(ChatRequest request) {
-        int id = Integer.parseInt(request.getBody());
-        PlayerHandler target = (PlayerHandler) GroupManager.findClientById(id);
-        GameManager.setTargetPlayer(this, target);
-    }
 }

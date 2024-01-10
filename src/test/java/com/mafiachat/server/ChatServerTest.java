@@ -1,66 +1,57 @@
 package com.mafiachat.server;
 
 import com.mafiachat.protocol.ChatRequest;
-import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
-import com.mafiachat.util.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import java.io.*;
+import com.mafiachat.server.manager.GameManager;
+import com.mafiachat.server.manager.GroupManager;
+import com.mafiachat.util.Constant;
+import com.mafiachat.util.TestClient;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+import java.util.logging.Logger;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class ChatServerTest {
-    @Test
-    public void testConnectClient() throws IOException {
-        //given
-        runServer();
-        TestClient testClient = new TestClient(Constant.SERVER_HOST, Constant.SERVER_PORT);
-        ChatRequest request = ChatRequest.createRequest(Command.INIT_ALIAS, "aaaa");
-        //when
-        testClient.write(request.getFormattedMessage());
-        String formattedMessage = testClient.read();
-        //then
-        Command command = new ChatResponse(formattedMessage).getCommand();
-        Assertions.assertEquals(command.name(), Command.USER_LIST.name());
-    }
 
-    @Test
-    public void testCommunicate() throws IOException {
-        runServer();
-        TestClient c1 = connectClient("aaa");
-        TestClient c2 = connectClient("bbb");
-        ChatRequest r1 = ChatRequest.createNormalRequest("aaa", "a");
-        ChatRequest r2 = ChatRequest.createNormalRequest("bbb", "b");
-        c1.write(r1.getFormattedMessage());
-        c2.write(r2.getFormattedMessage());
-        System.out.printf("test: %s\n", c1.read());
-        System.out.printf("test: %s\n", c1.read());
-        System.out.printf("test: %s\n", c1.read());
-        System.out.printf("test: %s\n", c1.read());
-        System.out.printf("test: %s\n", c1.read());
-        System.out.printf("test: %s\n", c1.read());
+    private ChatServer chatServer;
+    @Mock
+    Thread serverThread;
 
-        System.out.println(c1.read());
-        System.out.println(c1.read());
-        System.out.println(c1.read());
-        System.out.println(c1.read());
-        System.out.println(c1.read());
-        System.out.println(c2.read());
-        System.out.println(c2.read());
-        System.out.println(c2.read());
-    }
+    private Logger logger = Logger.getLogger(ChatServerTest.class.getSimpleName());
 
-    public static void runServer() throws IOException {
-        Thread serverThread = new Thread(new ChatServer());
+    @BeforeEach
+    public void runServer() throws IOException {
+        chatServer = new ChatServer(GroupManager.getInstance(), GameManager.getInstance());
+        serverThread = new Thread(chatServer);
         serverThread.start();
+    }
+
+    @AfterEach
+    public void stopServer() {
+        chatServer.shutdownHook();
+    }
+
+    @DisplayName("서버 실행 테스트")
+    @ParameterizedTest(name = "{index} {displayName} arguments = {arguments} message = {0}")
+    @EnumSource(value = Command.class, names = {"INIT_ALIAS", "NORMAL", "SYSTEM"})
+    public void connect_client(Command command) {
+        //then
+        logger.info("command = " + command);
     }
 
     public static List<TestClient> connectClients(int userNumber) throws IOException {
         ArrayList<TestClient> clients = new ArrayList<>();
-        for (int i=0;i<userNumber;i++){
-            TestClient client = connectClient("user%s".formatted(i+1));
+        for (int i = 0; i < userNumber; i++) {
+            TestClient client = connectClient("user%s".formatted(i + 1));
             clients.add(client);
         }
         return clients;

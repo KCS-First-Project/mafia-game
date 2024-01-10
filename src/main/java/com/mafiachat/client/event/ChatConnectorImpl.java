@@ -15,12 +15,15 @@ public class ChatConnectorImpl implements ChatConnector {
     private List<ChatSocketListener> sListeners = new ArrayList<>();
 
     @Override
-    public boolean connect() {
+    public boolean connect(String host, int port) {
+        if (host == null || host == "") {
+            host = Constant.SERVER_HOST;
+        }
         if (socketAvailable()) {
             return true;
         }
         try {
-            socket = new Socket(Constant.SERVER_HOST, Constant.SERVER_PORT);
+            socket = new Socket(host, port);
             for (ChatSocketListener listener : sListeners) {
                 listener.socketConnected(socket);
             }
