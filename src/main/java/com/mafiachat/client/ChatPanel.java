@@ -3,6 +3,7 @@ package com.mafiachat.client;
 import com.mafiachat.client.event.ChatConnector;
 import com.mafiachat.client.event.ChatSocketListener;
 import com.mafiachat.client.event.MessageReceiver;
+import com.mafiachat.client.util.ImageProvider;
 import com.mafiachat.protocol.ChatRequest;
 import com.mafiachat.protocol.ChatResponse;
 import com.mafiachat.protocol.Command;
@@ -17,6 +18,7 @@ import java.awt.event.KeyListener;
 import java.io.*;
 import java.awt.*;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,9 +67,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 
         GridBagConstraints c = new GridBagConstraints();
         //마피아 이미지 크기줄여 붙이기
-        ImageIcon mafiaIcon = new ImageIcon("images/mafia.jpeg");
-        Image mafiaImage = mafiaIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-        ImageIcon scaledMafiaIcon = new ImageIcon(mafiaImage);
+        ImageIcon scaledMafiaIcon = ImageProvider.getInstance().getScaledMafiaIcon();
         JLabel mafiaLabel = new JLabel(scaledMafiaIcon, JLabel.CENTER);
         JPanel timerPanel = new JPanel();
         timerPanel.setOpaque(false); // 투명하게 설정

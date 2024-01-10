@@ -2,6 +2,7 @@ package com.mafiachat.client;
 
 import com.mafiachat.client.event.ChatConnector;
 import com.mafiachat.client.event.ChatSocketListener;
+import com.mafiachat.client.util.ImageProvider;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -28,12 +29,16 @@ public class MafiaClient implements ChatConnector {
 	MafiaClient() {
 		
 		startWindow = new JFrame("MafiaStart");
+		ImageIcon mafiaIcon = ImageProvider.getInstance().getMafiaIcon();
+		startWindow.setIconImage(mafiaIcon.getImage());
 		startWindow.setSize(500, 400);
 		StartPanel startPanel = new StartPanel();
 		startWindow.add(startPanel);
 		startWindow.setVisible(true);
 		startWindow.setResizable(false);
+		startWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		gameWindow = new JFrame("MafiaChat");
+		gameWindow.setIconImage(mafiaIcon.getImage());
 
 		
 		

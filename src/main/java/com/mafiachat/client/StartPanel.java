@@ -1,5 +1,7 @@
 package com.mafiachat.client;
 
+import com.mafiachat.client.util.ImageProvider;
+
 import java.awt.Color;
 import java.awt.Font;
 
@@ -42,7 +44,7 @@ public class StartPanel extends JPanel {
 		mafiaImage.setBounds(150, 50, 200, 170);
 		play.setBounds(200, 250, 100, 30);
 		quit.setBounds(200, 300, 100, 30);
-		mafiaImage.setIcon(new ImageIcon("images/mafia.jpeg"));
+		mafiaImage.setIcon(ImageProvider.getInstance().getMafiaIcon());
 		setLayout(null);
         setBackground(Color.BLACK);
         add(midsLabel);
@@ -53,7 +55,7 @@ public class StartPanel extends JPanel {
 		quit.addActionListener(e -> {
 			JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
 			frame.dispose();
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		});
 
 	}
