@@ -23,7 +23,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,12 +62,12 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
     private String playerName = "anonymous";
     private Logger logger = Logger.getLogger(ChatPanel.class.getSimpleName());
     private int killedPlayer;
-    ImageIcon gunIcon = new ImageIcon(
-            new ImageIcon("images/gun.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
-    ImageIcon doctorIcon = new ImageIcon(
-            new ImageIcon("images/doctor.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
-    ImageIcon policeIcon = new ImageIcon(
-            new ImageIcon("images/police.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+//    ImageIcon gunIcon = new ImageIcon(
+//            new ImageIcon("images/gun.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+//    ImageIcon doctorIcon = new ImageIcon(
+//            new ImageIcon("images/doctor.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+//    ImageIcon policeIcon = new ImageIcon(
+//            new ImageIcon("images/police.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
 
     public ChatPanel(ChatConnector c) {
         super(new GridBagLayout());
@@ -365,7 +364,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 
                 killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "플레이어 선택",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                        gunIcon, votePlayer, votePlayer[0]);
+                        ImageProvider.getInstance().getScaledGunIcon(), votePlayer, votePlayer[0]);
 
                 System.out.println(killedPlayer);
                 //실제 아이디 보내주기
@@ -385,7 +384,7 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
 //                votePlayer[playerNum] = "살리기";
                 killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "최종 투표",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                        gunIcon, votePlayer, null);
+                        ImageProvider.getInstance().getScaledGunIcon(), votePlayer, null);
                 ChatRequest request = ChatRequest.createRequest(Command.VOTE,
                         String.valueOf(fistVotedList.get(votePlayer[killedPlayer])));
                 String killP = request.getFormattedMessage();
@@ -401,13 +400,13 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                 }
 
                 if (job.equals(Role.MAFIA)) {
-                    killedPlayer = showJobActionDialog(votePlayer, gunIcon,
+                    killedPlayer = showJobActionDialog(votePlayer, ImageProvider.getInstance().getScaledGunIcon(),
                             "누구를 죽이시겠습니까?");
                 } else if (job.equals(Role.DOCTOR)) {
-                    killedPlayer = showJobActionDialog(votePlayer, doctorIcon,
+                    killedPlayer = showJobActionDialog(votePlayer, ImageProvider.getInstance().getDoctorIcon(),
                             "누구를 살리겠습니까?");
                 } else if (job.equals(Role.POLICE)) {
-                    killedPlayer = showJobActionDialog(votePlayer, policeIcon,
+                    killedPlayer = showJobActionDialog(votePlayer, ImageProvider.getInstance().getScaledPoliceIcon(),
                             "누구의 직업을 확인하시겠습니까?");
                 }
 
