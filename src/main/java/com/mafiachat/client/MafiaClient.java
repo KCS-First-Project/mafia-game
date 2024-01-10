@@ -5,14 +5,11 @@ import com.mafiachat.client.event.ChatConnectorImpl;
 import com.mafiachat.client.panel.ChatPanel;
 import com.mafiachat.client.panel.StartPanel;
 import com.mafiachat.client.protocol.ChatMessageReceiver;
+import com.mafiachat.client.util.ImageProvider;
 import com.mafiachat.util.Constant;
 import java.awt.BorderLayout;
 import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
 
 public class MafiaClient {
@@ -32,6 +29,8 @@ public class MafiaClient {
         StartPanel startPanel = new StartPanel();
         startWindow = new JFrame("MafiaStart");
         startWindow.setSize(500, 400);
+        ImageIcon mafiaIcon = ImageProvider.getInstance().getMafiaIcon();
+        startWindow.setIconImage(mafiaIcon.getImage());
         startWindow.add(startPanel);
         startWindow.setVisible(true);
         startWindow.setResizable(false);

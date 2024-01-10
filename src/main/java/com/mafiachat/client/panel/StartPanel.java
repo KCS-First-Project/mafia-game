@@ -21,7 +21,7 @@ public class StartPanel extends JPanel {
 
         mafiaImage = new JLabel();
         mafiaImage.setIcon(ImageProvider.getInstance().getMafiaIcon());
-        mafiaImage.setBounds(150, 50, 200, 170);
+        mafiaImage.setBounds(150, 30, 200, 170);
         add(mafiaImage);
 
         play = new JButton("PLAY");
