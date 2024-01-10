@@ -346,6 +346,7 @@ public class GameManager {
         PlayerHandler mafiaTargetPlayer = role2TargetPlayer.getOrDefault(Role.MAFIA, null);
         PlayerHandler doctorTargetPlayer = role2TargetPlayer.getOrDefault(Role.DOCTOR, null);
         PlayerHandler policeTargetPlayer = role2TargetPlayer.getOrDefault(Role.POLICE, null);
+        role2TargetPlayer.clear();
 
         if (policeTargetPlayer != null) {
             ChatRequest request = ChatRequest.createSystemRequest(
