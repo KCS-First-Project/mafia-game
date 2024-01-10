@@ -23,6 +23,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,6 +62,13 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
     private final GameTimer gameTimer = GameTimer.getInstance();
     private String playerName = "anonymous";
     private Logger logger = Logger.getLogger(ChatPanel.class.getSimpleName());
+    private int killedPlayer;
+    ImageIcon gunIcon = new ImageIcon(
+            new ImageIcon("images/gun.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+    ImageIcon doctorIcon = new ImageIcon(
+            new ImageIcon("images/doctor.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
+    ImageIcon policeIcon = new ImageIcon(
+            new ImageIcon("images/police.jpeg").getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH));
 
     public ChatPanel(ChatConnector c) {
         super(new GridBagLayout());
@@ -355,8 +363,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                     votePlayer[i] = playerList.get(i).getName();
                 }
 
-                int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "플레이어 선택",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, votePlayer[0]);
+                killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "플레이어 선택",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        gunIcon, votePlayer, votePlayer[0]);
 
                 System.out.println(killedPlayer);
                 //실제 아이디 보내주기
@@ -374,8 +383,9 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                     votePlayer[idx++] = playerId;
                 }
 //                votePlayer[playerNum] = "살리기";
-                int killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "최종 투표",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, votePlayer, null);
+                killedPlayer = JOptionPane.showOptionDialog(null, "누구에게 투표하시겠습니까?", "최종 투표",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        gunIcon, votePlayer, null);
                 ChatRequest request = ChatRequest.createRequest(Command.VOTE,
                         String.valueOf(fistVotedList.get(votePlayer[killedPlayer])));
                 String killP = request.getFormattedMessage();
@@ -390,16 +400,18 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
                     votePlayer[i] = playerList.get(i).getName();
                 }
 
-                int killedPlayer = 0;
                 if (job.equals(Role.MAFIA)) {
-                    killedPlayer = showJobActionDialog(votePlayer, "누구를 죽이시겠습니까?");
+                    killedPlayer = showJobActionDialog(votePlayer, gunIcon,
+                            "누구를 죽이시겠습니까?");
                 } else if (job.equals(Role.DOCTOR)) {
-                    killedPlayer = showJobActionDialog(votePlayer, "누구를 살리겠습니까?");
+                    killedPlayer = showJobActionDialog(votePlayer, doctorIcon,
+                            "누구를 살리겠습니까?");
                 } else if (job.equals(Role.POLICE)) {
-                    killedPlayer = showJobActionDialog(votePlayer, "누구의 직업을 확인하시겠습니까?");
+                    killedPlayer = showJobActionDialog(votePlayer, policeIcon,
+                            "누구의 직업을 확인하시겠습니까?");
                 }
 
-                System.out.println(killedPlayer);
+                System.out.println("killedPlayer = " + killedPlayer);
                 //실제 아이디 보내주기
                 ChatRequest request = ChatRequest.createRequest(Command.ACT_ROLE, playerList.get(killedPlayer).getId());
                 String killP = request.getFormattedMessage();
@@ -410,15 +422,14 @@ public class ChatPanel extends JPanel implements MessageReceiver, ActionListener
         }
     }
 
-    private int showJobActionDialog(String[] votePlayer, String message) {
-        int killedPlayer;
+    private int showJobActionDialog(String[] votePlayer, ImageIcon icon, String message) {
         killedPlayer = JOptionPane.showOptionDialog(
                 null,
                 message,
                 job.description,
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                null,
+                icon,
                 votePlayer,
                 null
         );
