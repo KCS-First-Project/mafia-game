@@ -245,7 +245,12 @@ public class GameManager {
 
         PlayerHandler killedByMafia = applyRoleAction();
         announceKilledPlayer("밤 사이에", killedByMafia);
-        startDayChat();
+        GameResult gameResult = getGameResult();
+        if (gameResult == GameResult.RESUME) {
+            startNight();
+        } else {
+            endGame(gameResult);
+        }
     }
 
     private void endGame(GameResult gameResult) {
