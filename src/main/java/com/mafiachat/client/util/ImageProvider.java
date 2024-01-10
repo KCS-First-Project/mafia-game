@@ -40,8 +40,8 @@ public class ImageProvider {
 
     public ImageIcon getScaledDoctorIcon() {
         if (scaledMafiaIcon == null) {
-            Image mafiaImage = getDoctorIcon().getImage();
-            Image scaledMafiaImage = mafiaImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            Image doctorImage = getDoctorIcon().getImage();
+            Image scaledMafiaImage = doctorImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             scaledMafiaIcon = new ImageIcon(scaledMafiaImage);
         }
         return scaledMafiaIcon;
@@ -58,8 +58,8 @@ public class ImageProvider {
 
     public ImageIcon getScaledGunIcon() {
         if (scaledMafiaIcon == null) {
-            Image mafiaImage = getGunIcon().getImage();
-            Image scaledMafiaImage = mafiaImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            Image gunImage = getGunIcon().getImage();
+            Image scaledMafiaImage = gunImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             scaledMafiaIcon = new ImageIcon(scaledMafiaImage);
         }
         return scaledMafiaIcon;
