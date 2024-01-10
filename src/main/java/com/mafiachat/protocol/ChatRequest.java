@@ -20,6 +20,6 @@ public class ChatRequest extends ChatData {
     }
 
     public static ChatRequest createSystemRequest(String body) {
-        return createRequest(Command.SYSTEM, "[안내] " + body);
+        return createRequest(Command.SYSTEM, "[SYSTEM] " + body);
     }
 }

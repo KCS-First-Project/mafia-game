@@ -10,7 +10,6 @@ public class ChatData {
         this.body = extractRequestBody(formattedMessage);
         this.formattedMessage = formattedMessage;
     }
-
     private ChatData(Command command, String body) {
         this.command = command;
         this.body = body;
@@ -51,10 +50,5 @@ public class ChatData {
 
     protected String extractRequestBody(String request) {
         return request.replaceFirst("\\[\\w+\\]", "");
-    }
-
-    @Override
-    public int hashCode(){
-        return getFormattedMessage().hashCode();
     }
 }

@@ -1,10 +1,8 @@
 package com.mafiachat.client.util;
 
-import com.mafiachat.client.GameTimer;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Image;
 import java.net.URL;
+import javax.swing.ImageIcon;
 
 public class ImageProvider {
     private ImageIcon mafiaIcon;

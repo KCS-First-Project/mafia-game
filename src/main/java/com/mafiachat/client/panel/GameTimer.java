@@ -1,6 +1,6 @@
-package com.mafiachat.client;
+package com.mafiachat.client.panel;
 
-import javax.swing.*;
+import javax.swing.JLabel;
 
 public class GameTimer implements Runnable {
     private int totalSeconds;
